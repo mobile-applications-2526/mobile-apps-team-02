@@ -1,7 +1,7 @@
 import { View, Text, Button, Alert, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
 
-export default function StartScreen() {
+export default function StartScreen({navigation}) {
   return (
     <View className="flex-1 bg-white items-center justify-center px-6">
        <Image
