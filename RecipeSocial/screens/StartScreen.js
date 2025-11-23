@@ -1,5 +1,6 @@
 import { View, Text, Button, Alert, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 export default function StartScreen({navigation}) {
   return (
@@ -31,6 +32,7 @@ export default function StartScreen({navigation}) {
           Log in
         </Text>
       </TouchableOpacity>
+      <Navbar/>
     </View>
   )
 }
