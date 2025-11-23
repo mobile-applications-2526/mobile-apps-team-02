@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { supabase } from '../lib/supabase';
 
 export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -13,10 +14,33 @@ export default function RegisterScreen({ navigation }) {
   const containerHeight = moderateScale(568);
   const verticalSpacing = verticalScale(20);
 
-  const handleRegister = () => {
-    // TODO: Implement registration logic
-    console.log('Register pressed', { email, username, password });
-    // navigation.navigate('Home'); // Navigate after successful registration
+  const handleRegister = async () => {
+    if (!email || !username || !password) {
+      alert('Please fill out all fields');
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username, // store username in metadata
+        }
+      }
+    });
+
+    if (error) {
+      console.log('Sign up error:', error.message);
+      alert(error.message);
+      return;
+    }
+
+    console.log('User registered:', data);
+
+    alert('Account has been successfully created!');
+    // You can navigate after confirmation or immediately:
+    // navigation.navigate('Home')
   };
 
   return (
