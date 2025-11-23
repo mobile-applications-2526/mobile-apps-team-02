@@ -1,13 +1,38 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { supabase } from '../lib/supabase';
 
 export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const inputWidth = scale(329);
   const inputHeight = verticalScale(55);
   const containerHeight = moderateScale(468);
   const verticalSpacing = verticalScale(20);
+
+  // Login function
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      Alert.alert('Login Failed', error.message);
+    } else {
+      Alert.alert('Success', 'Logged in successfully!');
+      // Navigate to home or main screen
+      // navigation.navigate('Home');
+    }
+  };
 
   return (
     <SafeAreaView
@@ -16,27 +41,35 @@ export default function LoginScreen({ navigation }) {
     >
       <Image
         source={require('../assets/Logo2.png')}
-        style= {{width: scale(350), height: verticalScale(100),resizeMode: 'contain'}}
-
+        style={{ width: scale(350), height: verticalScale(100), resizeMode: 'contain' }}
       />
-      <Text></Text>
+
       <View
         className="bg-gray-200 justify-center self-stretch rounded-xl"
         style={{ height: containerHeight, paddingVertical: verticalSpacing }}
       >
         <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Username</Text>
+          <Text className="text-2xl font-bold">Email</Text>
           <TextInput
             className="border border-gray-400 rounded-lg p-3"
             style={{ height: inputHeight }}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholder="Enter your email"
           />
         </View>
 
         <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold ">Password</Text>
+          <Text className="text-2xl font-bold">Password</Text>
           <TextInput
             className="border border-gray-400 rounded-lg p-3"
             style={{ height: inputHeight }}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholder="Enter your password"
           />
         </View>
 
@@ -45,6 +78,7 @@ export default function LoginScreen({ navigation }) {
           <TouchableOpacity
             className="bg-gray-300 rounded-lg justify-center items-center"
             style={{ height: verticalScale(60) }}
+            onPress={handleLogin}
           >
             <Text className="text-2xl font-bold">Login</Text>
           </TouchableOpacity>
