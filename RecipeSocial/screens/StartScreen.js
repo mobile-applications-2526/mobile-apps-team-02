@@ -1,5 +1,6 @@
-import { View, Text, Button, Alert, TouchableOpacity, Image } from 'react-native'
+import { View, Text, Button, Alert, TouchableOpacity, Image, StyleSheet} from 'react-native'
 import React from 'react'
+import Navbar from '../components/Navbar'
 
 export default function StartScreen({navigation}) {
   return (
@@ -15,22 +16,33 @@ export default function StartScreen({navigation}) {
       </Text>
 
       <TouchableOpacity
-        className="bg-blue-500 w-full py-3 rounded-2xl mb-4"
-        onPress={() => navigation.navigate('Register')}
+        className="w-full py-3 rounded-2xl mb-4"
+        onPress={() => navigation.navigate('Register')} style={styles.button}
       >
-        <Text className="text-white text-center text-lg font-semibold">
+        <Text className="text-black text-center text-lg font-semibold">
           Register
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="border border-blue-500 w-full py-3 rounded-2xl"
+        className="border w-full py-3 rounded-2xl" style= {styles.border}
         onPress={() => navigation.navigate('Login')}
       >
-        <Text className="text-emerald-600 text-center text-lg font-semibold">
+        <Text className=" text-center text-lg font-semibold" style= {styles.text}>
           Log in
         </Text>
       </TouchableOpacity>
     </View>
   )
 }
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: '#7CC57E',
+  },
+  border:{
+    borderColor: '#7CC57E',
+  },
+  text:{
+    color: '#368EDE',
+  }
+})

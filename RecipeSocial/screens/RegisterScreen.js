@@ -54,8 +54,14 @@ export default function RegisterScreen({ navigation }) {
       />
       <Text></Text>
       <View
-        className="bg-gray-200 justify-center self-stretch rounded-xl"
-        style={{ height: containerHeight, paddingVertical: verticalSpacing }}
+        style={[
+          styles.container,
+          {
+            height: containerHeight,
+            paddingVertical: verticalSpacing,
+            marginVertical: verticalSpacing,
+          },
+        ]}
       >
         <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
           <Text className="text-2xl font-bold">Email</Text>
@@ -100,8 +106,8 @@ export default function RegisterScreen({ navigation }) {
 
         <View style={{ width: inputWidth, alignSelf: 'center' }}>
           <TouchableOpacity
-            className="bg-gray-300 rounded-lg justify-center items-center"
-            style={{ height: verticalScale(60) }}
+            className="rounded-lg justify-center items-center"
+            style={[styles.button,{ height: verticalScale(60) }]}
             onPress={handleRegister}
           >
             <Text className="text-2xl font-bold">Register</Text>
@@ -112,3 +118,29 @@ export default function RegisterScreen({ navigation }) {
   );
 }
 
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+  },
+  container: {
+    backgroundColor: '#FFFCF1',
+    borderWidth: 1,
+    borderColor: '#c0c0c0',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  button: {
+    backgroundColor: '#7CC57E',
+  },
+  border: {
+    borderColor: '#7CC57E',
+  },
+  text: {
+    color: '#d34067',
+  }
+})
