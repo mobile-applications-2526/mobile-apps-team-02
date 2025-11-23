@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
@@ -35,18 +35,21 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView
-      className="bg-white flex-1 items-center"
-      style={{ paddingHorizontal: scale(10) }}
-    >
+    <SafeAreaView style={[styles.safeArea, { paddingHorizontal: scale(10) }]}>
       <Image
         source={require('../assets/Logo2.png')}
         style={{ width: scale(350), height: verticalScale(100), resizeMode: 'contain' }}
       />
 
       <View
-        className="bg-gray-200 justify-center self-stretch rounded-xl"
-        style={{ height: containerHeight, paddingVertical: verticalSpacing }}
+        style={[
+          styles.container,
+          {
+            height: containerHeight,
+            paddingVertical: verticalSpacing,
+            marginVertical: verticalSpacing,
+          },
+        ]}
       >
         <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
           <Text className="text-2xl font-bold">Email</Text>
@@ -74,10 +77,10 @@ export default function LoginScreen({ navigation }) {
         </View>
 
         <View style={{ width: inputWidth, alignSelf: 'center' }}>
-          <Text className="self-end mb-4">Forgot Password?</Text>
+          <Text className="self-end mb-4" style={styles.text}>Forgot Password?</Text>
           <TouchableOpacity
             className="bg-gray-300 rounded-lg justify-center items-center"
-            style={{ height: verticalScale(60) }}
+            style={[styles.button, { height: verticalScale(60) }]}
             onPress={handleLogin}
           >
             <Text className="text-2xl font-bold">Login</Text>
@@ -87,3 +90,29 @@ export default function LoginScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+  },
+  container: {
+    backgroundColor: '#FFFCF1',
+    borderWidth: 1,
+    borderColor: '#c0c0c0',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  button: {
+    backgroundColor: '#7CC57E',
+  },
+  border: {
+    borderColor: '#7CC57E',
+  },
+  text: {
+    color: '#d34067',
+  }
+})
