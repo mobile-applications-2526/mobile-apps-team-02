@@ -6,7 +6,7 @@ import Header from '../components/Header'
 export default function StartScreen({ navigation }) {
   return (
     <View className="flex-1 bg-white">
-      <Header />
+      
       <View className="flex-1 bg-white items-center justify-center px-6">
         <Image
           source={require('../assets/logo.png')}
