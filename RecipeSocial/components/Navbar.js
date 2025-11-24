@@ -8,9 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 export default function Navbar({ navigation }) {
   return (
     <View style={styles.container} >
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
     </View>
   )
 }

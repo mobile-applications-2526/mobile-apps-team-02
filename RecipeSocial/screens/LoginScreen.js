@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#FFFCF1',
+    backgroundColor: '#7CC57E',
     borderWidth: 1,
     borderColor: '#c0c0c0',
     width: '100%',
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   button: {
-    backgroundColor: '#7CC57E',
+    backgroundColor: '#FFFCF1',
   },
   border: {
     borderColor: '#7CC57E',
