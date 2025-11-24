@@ -98,16 +98,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#FFFCF1',
-    borderWidth: 1,
-    borderColor: '#c0c0c0',
+    backgroundColor: 'rgba(124, 197, 126, 0.1)', 
+    borderRadius: scale(10),  
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
   },
   button: {
-    backgroundColor: '#7CC57E',
+    backgroundColor: '#rgba(124, 197, 126)',
   },
   border: {
     borderColor: '#7CC57E',
