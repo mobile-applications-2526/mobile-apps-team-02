@@ -16,13 +16,14 @@ export default function Header() {
         <View className="flex-row items-center justify-between" style={styles.header}>
             <View className="flex-1">
                 <SearchBar
-                    placeholder="Type Here..."
+                    placeholder="Search Recipes..."
                     onChangeText={setSearch}
                     value={search}
                     round={true}
                     lightTheme
                     containerStyle={{ backgroundColor: 'transparent', borderTopWidth: 0, borderBottomWidth: 0, padding: 0, width: moderateScale(270) }}
                     inputContainerStyle={{ backgroundColor: 'transparent', borderColor: 'gray', borderWidth: 1, borderBottomWidth: 1, height: verticalScale(40) }}
+                    inputStyle={{ fontSize: moderateScale(16)}}
                 />
             </View>
             <View style={styles.profile}>
@@ -31,9 +32,9 @@ export default function Header() {
                     <Ionicons name="flame-outline" size={scale(25)} color="black" />
                 </View>
                 <Image
-                    source={require('../assets/logo.png')}
-                    style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(20) }}
-                    resizeMode="contain"
+                    source={require('../assets/pfp.jpg')}
+                    style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
+                    resizeMode="cover"
                 />
             </View>
         </View>
