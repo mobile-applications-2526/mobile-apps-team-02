@@ -30,7 +30,7 @@ export default function LoginScreen({ navigation }) {
     } else {
       Alert.alert('Success', 'Logged in successfully!');
       // Navigate to home or main screen
-      // navigation.navigate('Home');
+      navigation.navigate('Home');
     }
   };
 

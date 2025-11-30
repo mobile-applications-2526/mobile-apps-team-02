@@ -8,16 +8,18 @@ import { Ionicons } from '@expo/vector-icons';
 export default function Navbar({ navigation }) {
   return (
     <View style={styles.container} >
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home-outlined" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+   
     flexDirection: 'row',
+    alignSelf: 'center', 
     justifyContent: "flex-end",
     borderRadius: scale(10),
     width: scale(373),

@@ -5,7 +5,7 @@ import Header from '../components/Header'
 
 export default function StartScreen({ navigation }) {
   return (
-    <View className="flex-1 bg-white">.
+    <View className="flex-1 bg-white">
       <View className="flex-1 bg-white items-center justify-center px-6">
         <Image
           source={require('../assets/logo.png')}
@@ -34,7 +34,9 @@ export default function StartScreen({ navigation }) {
             Log in
           </Text>
         </TouchableOpacity>
+        <Navbar/>
       </View>
+      
     </View>
   )
 }
