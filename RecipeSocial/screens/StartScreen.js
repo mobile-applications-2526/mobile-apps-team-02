@@ -34,7 +34,6 @@ export default function StartScreen({ navigation }) {
             Log in
           </Text>
         </TouchableOpacity>
-        <Navbar/>
       </View>
       
     </View>

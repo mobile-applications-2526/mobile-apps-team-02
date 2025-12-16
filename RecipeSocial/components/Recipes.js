@@ -3,30 +3,26 @@ import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, Styl
 import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 
-export default function Recipes() {
+
+export default function Recipes({ recipes = [], loading }) {
     return (
         <View>
-            <View>
-                <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">Home Screen</Text>
-                <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
-                    <View style={styles.card}>
+            <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">Home Screen</Text>
+            <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
+                {recipes.map((recipe) => (
+                    <View key={recipe.id} style={styles.card}>
                         <Image
-                            source={require('../assets/testRecipe.jpg')}
+                            source={{uri: recipe.imageUrl}}
                             style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
                         />
-                        <Text style={styles.cardText}>Name</Text>
+                        <Text style={styles.cardText}>{recipe.title}</Text>
                         <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
                     </View>
-                    <View style={styles.card}>
-                        <Image
-                            source={require('../assets/testRecipe.jpg')}
-                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                        />
-                        <Text style={styles.cardText}>Name</Text>
-                        <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
-                    </View>
-                </ScrollView >
-            </View>
+                    
+                ))}
+                
+            </ScrollView >
+
             <View>
                 <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">Home Screen</Text>
                 <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
