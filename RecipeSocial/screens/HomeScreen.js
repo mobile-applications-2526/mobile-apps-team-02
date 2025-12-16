@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,18 +7,39 @@ import Header from '../components/Header';
 import Recipes from '../components/Recipes';
 import Category from '../components/Category';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
-import { withTheme } from 'react-native-elements';
+import { supabase } from '../lib/supabase';
+
 
 export default function HomeScreen({ navigation }) {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getRecipes = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('*');
+
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      setRecipes(data);
+    }
+    setLoading(false);
+
+  };
+  useEffect(() => {
+    getRecipes();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Header />
       <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
-        <Category/>
+        <Category />
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
-        <Recipes />
+        <Recipes recipes={recipes} loading={loading} />
       </ScrollView>
       <Navbar />
 
