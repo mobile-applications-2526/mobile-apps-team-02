@@ -4,26 +4,88 @@ import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 
 
-export default function Recipes({ CategoriesAndRecipes = [], loading }) {
+export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null }) {
+    // Filter categories and recipes based on search query and selected category
+    const filteredData = CategoriesAndRecipes.map((category) => {
+        // Filter recipes by search query
+        const filteredRecipes = category.recipe_categories.filter((recipe_category) => {
+            const recipe = recipe_category.recipe;
+            const matchesSearch = searchQuery === '' ||
+                recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesSearch;
+        });
+
+        return {
+            ...category,
+            recipe_categories: filteredRecipes
+        };
+    }).filter((category) => {
+        // Only show categories that have recipes after filtering
+        // Or if a specific category is selected, only show that one
+        if (selectedCategory !== null) {
+            return category.id === selectedCategory && category.recipe_categories.length > 0;
+        }
+        return category.recipe_categories.length > 0;
+    });
+
     return (
         <View>
-            {CategoriesAndRecipes.map((Category) => (
-                <View key={Category.id}>
-                    <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">{Category.name}</Text>
-                    <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
-                        {Category.recipe_categories.map((recipe_categorie) => (
-                            <View key={recipe_categorie.recipe.id} style={styles.card}>
-                                <Image
-                                    source={require('../assets/testRecipe.jpg')}
-                                    style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                                />
-                                <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">{recipe_categorie.recipe.title}</Text>
-                                <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
+            {filteredData.map((Category) => {
+                const isSelectedCategory = selectedCategory === Category.id;
+
+                return (
+                    <View key={Category.id}>
+                        <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">
+                            {Category.name}
+                        </Text>
+
+                        {isSelectedCategory ? (
+                            // Vertical list for selected category
+                            <View style={styles.verticalContainer}>
+                                {Category.recipe_categories.map((recipe_categorie) => (
+                                    <View key={recipe_categorie.recipe.id} style={styles.verticalCard}>
+                                        <Image
+                                            source={require('../assets/testRecipe.jpg')}
+                                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                        />
+                                        <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
+                                            {recipe_categorie.recipe.title}
+                                        </Text>
+                                        <TouchableOpacity style={styles.cardIcon}>
+                                            <Ionicons name="heart-outline" size={moderateScale(28)} color="white" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
                             </View>
-                        ))}
-                    </ScrollView >
+                        ) : (
+                            // Horizontal scroll for non-selected categories
+                            <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}>
+                                {Category.recipe_categories.map((recipe_categorie) => (
+                                    <View key={recipe_categorie.recipe.id} style={styles.card}>
+                                        <Image
+                                            source={require('../assets/testRecipe.jpg')}
+                                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                        />
+                                        <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
+                                            {recipe_categorie.recipe.title}
+                                        </Text>
+                                        <TouchableOpacity style={styles.cardIcon}>
+                                            <Ionicons name="heart-outline" size={moderateScale(28)} color="white" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
+                    </View>
+                );
+            })}
+            {filteredData.length === 0 && !loading && (
+                <View style={{ padding: scale(20), alignItems: 'center' }}>
+                    <Text style={{ fontSize: moderateScale(16), color: '#666' }}>
+                        No recipes found
+                    </Text>
                 </View>
-            ))}
+            )}
         </View>
     )
 }
@@ -32,9 +94,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: scale(10),
         gap: scale(10),
     },
+    verticalContainer: {
+        paddingHorizontal: scale(10),
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: scale(10),
+        paddingVertical: scale(10),
+    },
     card: {
         position: 'relative',
         textAlign: 'center',
+    },
+    verticalCard: {
+        position: 'relative',
+        textAlign: 'center',
+        width: scale(126),
+        marginBottom: scale(10),
     },
     cardText: {
         position: 'absolute',

@@ -13,6 +13,8 @@ import { supabase } from '../lib/supabase';
 export default function HomeScreen({ navigation }) {
   const [CategoriesAndRecipes, setCategoriesAndRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const getCategoriesAndRecipes = async () => {
     setLoading(true);
@@ -37,14 +39,27 @@ export default function HomeScreen({ navigation }) {
     getCategoriesAndRecipes();
   }, []);
 
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Header />
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
-        <Category CategoriesAndRecipes={CategoriesAndRecipes} />
+        <Category
+          CategoriesAndRecipes={CategoriesAndRecipes}
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleCategorySelect}
+        />
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
-        <Recipes CategoriesAndRecipes={CategoriesAndRecipes} loading={loading} />
+        <Recipes
+          CategoriesAndRecipes={CategoriesAndRecipes}
+          loading={loading}
+          searchQuery={searchQuery}
+          selectedCategory={selectedCategory}
+        />
       </ScrollView>
       <Navbar />
 

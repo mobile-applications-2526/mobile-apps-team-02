@@ -6,19 +6,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { moderateScale, scale, verticalScale } from "../utils/scaling";
 import { space } from "postcss/lib/list";
 
-export default function Header() {
-    const [search, setSearch] = useState('');
-
-    // const updateSearch = (value) => {
-    //     setSearch(value);
-    // };
+export default function Header({ searchQuery = '', setSearchQuery = () => {} }) {
     return (
         <View className="flex-row items-center justify-between" style={styles.header}>
             <View className="flex-1">
                 <SearchBar
                     placeholder="Search Recipes..."
-                    onChangeText={setSearch}
-                    value={search}
+                    onChangeText={setSearchQuery}
+                    value={searchQuery}
                     round={true}
                     lightTheme
                     containerStyle={{ backgroundColor: 'transparent', borderTopWidth: 0, borderBottomWidth: 0, padding: 0, width: moderateScale(270) }}

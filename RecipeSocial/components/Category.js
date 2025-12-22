@@ -1,12 +1,25 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 
-export default function Category({ CategoriesAndRecipes = [] }) {
+export default function Category({ CategoriesAndRecipes = [], selectedCategory = null, onCategorySelect = () => {} }) {
     return (
         <View style={{ flexDirection: 'row' }}>
-            {CategoriesAndRecipes.map((Category) => (
-                <Text key={Category.id} style={styles.categoryButton}>{Category.name}</Text>
-            ))}
+            {CategoriesAndRecipes.map((Category) => {
+                const isSelected = selectedCategory === Category.id;
+                return (
+                    <TouchableOpacity
+                        key={Category.id}
+                        onPress={() => onCategorySelect(Category.id)}
+                    >
+                        <Text style={[
+                            styles.categoryButton,
+                            isSelected && styles.categoryButtonSelected
+                        ]}>
+                            {Category.name}
+                        </Text>
+                    </TouchableOpacity>
+                );
+            })}
         </View>
     )
 }
@@ -18,6 +31,11 @@ const styles = StyleSheet.create({
         borderRadius: scale(7),
         paddingHorizontal: scale(10),
         paddingVertical: verticalScale(7),
+    },
+    categoryButtonSelected: {
+        backgroundColor: '#5AA55C',
+        borderWidth: 2,
+        borderColor: '#3D8B3F',
     },
 
 });
