@@ -11,25 +11,30 @@ import { supabase } from '../lib/supabase';
 
 
 export default function HomeScreen({ navigation }) {
-  const [recipes, setRecipes] = useState([]);
+  const [CategoriesAndRecipes, setCategoriesAndRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getRecipes = async () => {
+  const getCategoriesAndRecipes = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('recipes')
-      .select('*');
+      .from('categories')
+      .select(`id, name, recipe_categories (
+        recipe:recipes (
+          id,
+          title,
+          image_url
+        )
+      )`);
 
     if (error) {
       Alert.alert('Error', error.message);
     } else {
-      setRecipes(data);
+      setCategoriesAndRecipes(data);
     }
     setLoading(false);
-
   };
   useEffect(() => {
-    getRecipes();
+    getCategoriesAndRecipes();
   }, []);
 
   return (
@@ -39,7 +44,7 @@ export default function HomeScreen({ navigation }) {
         <Category />
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
-        <Recipes recipes={recipes} loading={loading} />
+        <Recipes CategoriesAndRecipes={CategoriesAndRecipes} loading={loading} />
       </ScrollView>
       <Navbar />
 
