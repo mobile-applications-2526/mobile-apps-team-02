@@ -61,7 +61,7 @@ export default function HomeScreen({ navigation }) {
           selectedCategory={selectedCategory}
         />
       </ScrollView>
-      <Navbar />
+      <Navbar navigation={navigation} currentScreen="Home" />
 
     </SafeAreaView>
   );

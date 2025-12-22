@@ -5,12 +5,41 @@ import { Ionicons } from '@expo/vector-icons';
 
 
 
-export default function Navbar({ navigation }) {
+export default function Navbar({ navigation, currentScreen = 'Home' }) {
   return (
     <View style={styles.container} >
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => navigation?.navigate('Home')}
+      >
+        <Ionicons
+          style={styles.icons}
+          name="home"
+          size={moderateScale(28)}
+          color={currentScreen === 'Home' ? '#7CC57E' : 'black'}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.buttons}>
+        <Ionicons
+          style={styles.icons}
+          name="add"
+          size={moderateScale(28)}
+          color="black"
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => navigation?.navigate('Collections')}
+      >
+        <Ionicons
+          style={styles.icons}
+          name="heart"
+          size={moderateScale(28)}
+          color={currentScreen === 'Collections' ? '#7CC57E' : 'black'}
+        />
+      </TouchableOpacity>
     </View>
   )
 }
