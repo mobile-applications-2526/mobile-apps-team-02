@@ -1,25 +1,26 @@
-import { use, useState } from "react";
-import { View, Image, Text, StyleSheet } from "react-native";
-import { SearchBar } from 'react-native-elements';
+import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
 import { moderateScale, scale, verticalScale } from "../utils/scaling";
-import { space } from "postcss/lib/list";
 
 export default function Header({ searchQuery = '', setSearchQuery = () => {} }) {
     return (
         <View className="flex-row items-center justify-between" style={styles.header}>
             <View className="flex-1">
-                <SearchBar
-                    placeholder="Search Recipes..."
-                    onChangeText={setSearchQuery}
-                    value={searchQuery}
-                    round={true}
-                    lightTheme
-                    containerStyle={{ backgroundColor: 'transparent', borderTopWidth: 0, borderBottomWidth: 0, padding: 0, width: moderateScale(270) }}
-                    inputContainerStyle={{ backgroundColor: 'transparent', borderColor: 'gray', borderWidth: 1, borderBottomWidth: 1, height: verticalScale(40) }}
-                    inputStyle={{ fontSize: moderateScale(16)}}
-                />
+                <View style={styles.searchContainer}>
+                    <Ionicons name="search" size={moderateScale(20)} color="#666" style={styles.searchIcon} />
+                    <TextInput
+                        placeholder="Search Recipes..."
+                        onChangeText={setSearchQuery}
+                        value={searchQuery}
+                        style={styles.searchInput}
+                        placeholderTextColor="#999"
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                            <Ionicons name="close-circle" size={moderateScale(20)} color="#666" />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
             <View style={styles.profile}>
                 <View style={{gap: scale(1) , alignItems: 'center', flexDirection: 'row', }}>
@@ -40,6 +41,29 @@ const styles = StyleSheet.create({
         height: verticalScale(75),
         padding: moderateScale(10),
         
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: moderateScale(20),
+        height: verticalScale(40),
+        width: moderateScale(270),
+        paddingHorizontal: moderateScale(12),
+    },
+    searchIcon: {
+        marginRight: moderateScale(8),
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: moderateScale(16),
+        color: '#000',
+        padding: 0,
+    },
+    clearButton: {
+        padding: moderateScale(4),
     },
     profile: {
         width: scale(96),
