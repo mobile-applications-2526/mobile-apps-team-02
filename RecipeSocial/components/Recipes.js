@@ -4,46 +4,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 
 
-export default function Recipes({ recipes = [], loading }) {
+export default function Recipes({ CategoriesAndRecipes = [], loading }) {
     return (
         <View>
-            <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">Home Screen</Text>
-            <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
-                {recipes.map((recipe) => (
-                    <View key={recipe.id} style={styles.card}>
-                        <Image
-                            source={{uri: recipe.imageUrl}}
-                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                        />
-                        <Text style={styles.cardText}>{recipe.title}</Text>
-                        <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
-                    </View>
-                    
-                ))}
-                
-            </ScrollView >
-
-            <View>
-                <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">Home Screen</Text>
-                <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
-                    <View style={styles.card}>
-                        <Image
-                            source={require('../assets/testRecipe.jpg')}
-                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                        />
-                        <Text style={styles.cardText}>Name</Text>
-                        <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
-                    </View>
-                    <View style={styles.card}>
-                        <Image
-                            source={require('../assets/testRecipe.jpg')}
-                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                        />
-                        <Text style={styles.cardText}>Name</Text>
-                        <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
-                    </View>
-                </ScrollView >
-            </View>
+            {CategoriesAndRecipes.map((Category) => (
+                <View key={Category.id}>
+                    <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">{Category.name}</Text>
+                    <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}  >
+                        {Category.recipe_categories.map((recipe_categorie) => (
+                            <View key={recipe_categorie.recipe.id} style={styles.card}>
+                                <Image
+                                    source={require('../assets/testRecipe.jpg')}
+                                    style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                />
+                                <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">{recipe_categorie.recipe.title}</Text>
+                                <TouchableOpacity style={styles.cardIcon}><Ionicons name="heart-outline" size={moderateScale(28)} color="white" /></TouchableOpacity>
+                            </View>
+                        ))}
+                    </ScrollView >
+                </View>
+            ))}
         </View>
     )
 }
