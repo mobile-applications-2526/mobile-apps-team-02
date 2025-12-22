@@ -41,7 +41,7 @@ export default function HomeScreen({ navigation }) {
     <SafeAreaView className="flex-1 bg-white">
       <Header />
       <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
-        <Category />
+        <Category CategoriesAndRecipes={CategoriesAndRecipes} />
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
         <Recipes CategoriesAndRecipes={CategoriesAndRecipes} loading={loading} />

@@ -1,14 +1,12 @@
 import { View, Text, StyleSheet } from "react-native";
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 
-export default function Category() {
+export default function Category({ CategoriesAndRecipes = [] }) {
     return (
         <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.categoryButton}>fHHKJHJ</Text>
-            <Text style={styles.categoryButton}>fHHKJH</Text>
-            <Text style={styles.categoryButton}>fHHKJH</Text>
-            <Text style={styles.categoryButton}>fHHKJH</Text>
-            <Text style={styles.categoryButton}>fHHKJH</Text>
+            {CategoriesAndRecipes.map((Category) => (
+                <Text key={Category.id} style={styles.categoryButton}>{Category.name}</Text>
+            ))}
         </View>
     )
 }
