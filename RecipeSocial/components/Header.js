@@ -1,8 +1,42 @@
-import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale, scale, verticalScale } from "../utils/scaling";
+import { supabase } from '../lib/supabase';
+import { useState } from 'react';
 
-export default function Header({ searchQuery = '', setSearchQuery = () => {} }) {
+export default function Header({ searchQuery = '', setSearchQuery = () => {}, navigation }) {
+    const [showMenu, setShowMenu] = useState(false);
+
+    const handleLogout = async () => {
+        Alert.alert(
+            'Logout',
+            'Are you sure you want to logout?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: async () => {
+                        const { error } = await supabase.auth.signOut();
+                        if (error) {
+                            Alert.alert('Error', error.message);
+                        } else {
+                            if (navigation) {
+                                navigation.reset({
+                                    index: 0,
+                                    routes: [{ name: 'Start' }],
+                                });
+                            }
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     return (
         <View className="flex-row items-center justify-between" style={styles.header}>
             <View className="flex-1">
@@ -27,11 +61,13 @@ export default function Header({ searchQuery = '', setSearchQuery = () => {} }) 
                     <Text>1</Text>
                     <Ionicons name="flame-outline" size={scale(25)} color="black" />
                 </View>
-                <Image
-                    source={require('../assets/pfp.jpg')}
-                    style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
-                    resizeMode="cover"
-                />
+                <TouchableOpacity onPress={handleLogout} activeOpacity={0.7}>
+                    <Image
+                        source={require('../assets/pfp.jpg')}
+                        style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
+                        resizeMode="cover"
+                    />
+                </TouchableOpacity>
             </View>
         </View>
     )

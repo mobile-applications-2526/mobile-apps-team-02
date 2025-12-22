@@ -39,8 +39,8 @@ export default function RegisterScreen({ navigation }) {
     console.log('User registered:', data);
 
     alert('Account has been successfully created!');
-    // You can navigate after confirmation or immediately:
-    // navigation.navigate('Home')
+    // Navigate to Home after successful registration
+    navigation.navigate('Home');
   };
 
   return (

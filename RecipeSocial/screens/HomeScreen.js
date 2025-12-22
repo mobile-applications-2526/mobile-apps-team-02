@@ -45,7 +45,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} navigation={navigation} />
       <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
         <Category
           CategoriesAndRecipes={CategoriesAndRecipes}
