@@ -1,47 +1,63 @@
-import React from 'react'
-import { View, Text, Alert, TouchableOpacity, Image, StyleSheet } from 'react-native'
+import React from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 
+export default function Navbar() {
+  const navigation = useNavigation();
 
-
-export default function Navbar({ navigation }) {
   return (
-    <View style={styles.container} >
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Ionicons style={styles.icons} name="home" size={moderateScale(28)} color="black" /></TouchableOpacity>
+    <View style={styles.container}>
+
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Ionicons name="home" size={moderateScale(28)} color="black" />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Ionicons name="restaurant" size={moderateScale(28)} color="black" />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => navigation.navigate('Profile')}
+      >
+        <AntDesign name="profile" size={moderateScale(28)} color="black" />
+      </TouchableOpacity>
+
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-   
     flexDirection: 'row',
-    alignSelf: 'center', 
-    justifyContent: "flex-end",
+    alignSelf: 'center',
+    justifyContent: 'space-between',
     borderRadius: scale(10),
     width: scale(373),
     height: moderateScale(70),
-    paddingLeft: scale(20),
-    paddingRight: scale(20),
-    justifyContent: "space-between",
+    paddingHorizontal: scale(20),
     backgroundColor: '#7CC57E',
     alignItems: 'center',
-    flexShrink: 0,
 
-    position: 'absolute',   // fix to screen
-    bottom: verticalScale(10),              // at the bottom
+    position: 'absolute',
+    bottom: verticalScale(10),
   },
   buttons: {
     width: scale(50),
     height: verticalScale(50),
     backgroundColor: '#fff8e1',
     borderRadius: 50,
-    alignItems: "center",      // centers horizontally
-    justifyContent: "center",
-    elevation: 4, 
-    shadowColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
   },
 });
