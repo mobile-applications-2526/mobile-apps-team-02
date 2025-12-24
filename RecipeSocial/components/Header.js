@@ -61,7 +61,7 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
                     <Text>1</Text>
                     <Ionicons name="flame-outline" size={scale(25)} color="black" />
                 </View>
-                <TouchableOpacity onPress={() => navigation.navigate('Profilet')  /* !setShowMenu(prev => !prev) */} activeOpacity={0.7}>
+                <TouchableOpacity onPress={() => navigation.navigate('Profile')  /* !setShowMenu(prev => !prev) */} activeOpacity={0.7}>
                     <Image
                         source={require('../assets/pfp.jpg')}
                         style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
