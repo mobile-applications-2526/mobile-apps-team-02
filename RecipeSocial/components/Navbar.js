@@ -20,16 +20,16 @@ export default function Navbar() {
 
       <TouchableOpacity
         style={styles.buttons}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('Create')}
       >
-        <Ionicons name="restaurant" size={moderateScale(28)} color="black" />
+        <Ionicons name="add-outline" size={moderateScale(28)} color="black" />
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.buttons}
-        onPress={() => navigation.navigate('Profile')}
+        onPress={() => navigation.navigate('Collections')}
       >
-        <AntDesign name="profile" size={moderateScale(28)} color="black" />
+        <Ionicons name="heart-outline" size={moderateScale(28)} color="black" />
       </TouchableOpacity>
 
     </View>
