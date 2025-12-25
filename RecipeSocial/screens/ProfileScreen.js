@@ -13,8 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import Navbar from '../components/Navbar';
 import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function ProfileScreen() {
+  const navigation = useNavigation();
   const [profile, setProfile] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [stats, setStats] = useState({ followers: 0, following: 0 });
@@ -96,9 +99,13 @@ export default function ProfileScreen() {
             <Text style={styles.bio}>{profile?.bio || 'No bio yet'}</Text>
           </View>
 
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={() => navigation.navigate('EditProfile')}
+          >
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
+
         </View>
 
         {/* Stats */}
