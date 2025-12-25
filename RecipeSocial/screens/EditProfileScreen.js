@@ -7,14 +7,20 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function EditProfileScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [avatar, setAvatar] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -33,12 +39,53 @@ export default function EditProfileScreen({ navigation }) {
 
     const { data } = await supabase
       .from('userinfo')
-      .select('username')
+      .select('username, avatar_url')
       .eq('id', user.id)
       .single();
 
-    if (data) setUsername(data.username);
+    if (data) {
+      setUsername(data.username);
+      setAvatar(data.avatar_url);
+    }
+
     setLoading(false);
+  };
+
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Please allow photo access');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
+
+  const uploadAvatar = async (uri, userId) => {
+    const fileExt = uri.split('.').pop() || 'jpg';
+    const filePath = `${uuidv4()}.${fileExt}`;
+
+    const response = await fetch(uri);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const { error } = await supabase.storage
+      .from('profile-images')
+      .upload(filePath, arrayBuffer, { upsert: false, contentType: 'image/*' });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage.from('profile-images').getPublicUrl(filePath);
+    return data.publicUrl;
   };
 
   const saveChanges = async () => {
@@ -50,38 +97,43 @@ export default function EditProfileScreen({ navigation }) {
 
     if (!user) return;
 
-    /** Update username (userinfo table) */
-    const { error: usernameError } = await supabase
+    let avatarUrl = avatar;
+
+    // Upload avatar if changed
+    if (avatar && avatar.startsWith('file://')) {
+      try {
+        avatarUrl = await uploadAvatar(avatar, user.id);
+      } catch (error) {
+        Alert.alert('Upload Error', error.message);
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Update profile table
+    const { error } = await supabase
       .from('userinfo')
-      .update({ username })
+      .update({ username, avatar_url: avatarUrl })
       .eq('id', user.id);
 
-    if (usernameError) {
-      Alert.alert('Error', usernameError.message);
+    if (error) {
+      Alert.alert('Error', error.message);
       setSaving(false);
       return;
     }
 
-    /** Update email (Supabase Auth) */
+    // Update email if changed
     if (email !== user.email) {
-      const { error: emailError } = await supabase.auth.updateUser({
-        email,
-      });
-
+      const { error: emailError } = await supabase.auth.updateUser({ email });
       if (emailError) {
         Alert.alert('Email Update Failed', emailError.message);
         setSaving(false);
         return;
-      } else {
-        Alert.alert(
-          'Confirm Email',
-          'Check your email to confirm the new address.'
-        );
       }
     }
 
     Alert.alert('Success', 'Profile updated');
-    navigation.goBack();
+    navigation.navigate('Profile', { newAvatar: avatarUrl });
     setSaving(false);
   };
 
@@ -97,20 +149,25 @@ export default function EditProfileScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Edit Profile</Text>
 
-      <Text style={styles.label}>Username</Text>
-      <TextInput
-        value={username}
-        onChangeText={setUsername}
-        style={styles.input}
-        placeholder="Username"
-      />
+      {/* Avatar */}
+      <TouchableOpacity onPress={pickImage} style={styles.avatarWrapper}>
+        <Image
+          source={avatar ? { uri: avatar } : require('../assets/pfp.jpg')}
+          style={styles.avatar}
+        />
+        <Text style={styles.changeAvatar}>Change Photo</Text>
+      </TouchableOpacity>
 
+      {/* Username */}
+      <Text style={styles.label}>Username</Text>
+      <TextInput value={username} onChangeText={setUsername} style={styles.input} />
+
+      {/* Email */}
       <Text style={styles.label}>Email</Text>
       <TextInput
         value={email}
         onChangeText={setEmail}
         style={styles.input}
-        placeholder="Email"
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -120,35 +177,17 @@ export default function EditProfileScreen({ navigation }) {
         onPress={saveChanges}
         disabled={saving}
       >
-        <Text style={styles.saveText}>
-          {saving ? 'Saving...' : 'Save Changes'}
-        </Text>
+        <Text style={styles.saveText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: scale(16),
-    backgroundColor: '#fff',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: moderateScale(20),
-    fontWeight: '700',
-    marginBottom: scale(24),
-  },
-  label: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 6,
-  },
+  container: { flex: 1, padding: scale(16), backgroundColor: '#fff' },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: moderateScale(20), fontWeight: '700', marginBottom: scale(24) },
+  label: { fontSize: 12, color: '#666', marginBottom: 6 },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -164,9 +203,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: scale(12),
   },
-  saveText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 14,
-  },
+  saveText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  avatarWrapper: { alignItems: 'center', marginBottom: scale(24) },
+  avatar: { width: scale(90), height: scale(90), borderRadius: scale(45), backgroundColor: '#ddd' },
+  changeAvatar: { fontSize: 12, color: '#7CC57E', marginTop: 8, fontWeight: '600' },
 });
