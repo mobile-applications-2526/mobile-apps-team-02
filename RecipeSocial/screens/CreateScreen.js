@@ -7,6 +7,7 @@ import Ingredients from '../components/create/Ingredients';
 
 export default function CreateScreen() {
     const [image, setImage] = useState(null);
+    const [step, setStep] = useState(0);
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library.
         // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
@@ -41,7 +42,13 @@ export default function CreateScreen() {
             <View style={styles.container}>
                 {image && (
                     <View>
-                        <Ingredients />
+                        {image && step === 0 && (
+                            <Ingredients onNext={() => setStep(1)} />
+                        )}
+
+                        {image && step === 1 && (
+                            <NextComponent onBack={() => setStep(0)} />
+                        )}
                     </View>)}
             </View>
             <Navbar />

@@ -13,8 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import Navbar from '../components/Navbar';
 import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function ProfileScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
   const [profile, setProfile] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [stats, setStats] = useState({ followers: 0, following: 0 });
@@ -24,38 +27,40 @@ export default function ProfileScreen() {
     fetchProfileAndRecipes();
   }, []);
 
+  // Update avatar if coming back from EditProfileScreen
+  useEffect(() => {
+    if (route.params?.newAvatar) {
+      setProfile(prev => prev ? { ...prev, avatar_url: route.params.newAvatar } : prev);
+    }
+  }, [route.params?.newAvatar]);
+
   const fetchProfileAndRecipes = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
     if (!user) return;
 
-    // Fetch user profile
+    // Profile
     const { data: profileData, error: profileError } = await supabase
       .from('userinfo')
       .select('*')
       .eq('id', user.id)
       .single();
-
     if (!profileError) setProfile(profileData);
 
-    // Fetch user recipes
+    // Recipes
     const { data: recipesData, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-
     if (!recipesError) setRecipes(recipesData);
 
-    // Fetch followers count
+    // Followers / Following counts
     const { count: followersCount } = await supabase
       .from('followers')
       .select('*', { count: 'exact', head: true })
       .eq('following_id', user.id);
-
-    // Fetch following count
     const { count: followingCount } = await supabase
       .from('followers')
       .select('*', { count: 'exact', head: true })
@@ -96,9 +101,30 @@ export default function ProfileScreen() {
             <Text style={styles.bio}>{profile?.bio || 'No bio yet'}</Text>
           </View>
 
-          <TouchableOpacity style={styles.editBtn}>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row' }}>
+            {/* Edit button */}
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={() => navigation.navigate('EditProfile')}
+            >
+              <Text style={styles.editText}>Edit</Text>
+            </TouchableOpacity>
+
+            {/* Logout button */}
+            <TouchableOpacity
+              style={[styles.editBtn, { marginLeft: scale(8), backgroundColor: '#FF4C4C' }]}
+              onPress={async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                  alert('Logout failed: ' + error.message);
+                } else {
+                  navigation.replace('Login');
+                }
+              }}
+            >
+              <Text style={[styles.editText, { color: '#fff' }]}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Stats */}
@@ -145,83 +171,20 @@ const Stat = ({ label, value }) => (
 );
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    padding: scale(16),
-    alignItems: 'center',
-  },
-  avatar: {
-    width: scale(70),
-    height: scale(70),
-    borderRadius: 35,
-    backgroundColor: '#ddd',
-    marginRight: scale(12),
-  },
-  username: {
-    fontSize: moderateScale(18),
-    fontWeight: '700',
-  },
-  bio: {
-    fontSize: moderateScale(12),
-    color: '#666',
-    marginVertical: 4,
-  },
-  editBtn: {
-    backgroundColor: '#eee',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(6),
-    borderRadius: 8,
-  },
-  editText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: scale(12),
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: '#666',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: scale(8),
-  },
-  recipeCard: {
-    width: '31%',
-    aspectRatio: 1,
-    margin: '1%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#ddd',
-  },
-  recipeImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 12,
-  },
-  heart: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { flexDirection: 'row', padding: scale(16), alignItems: 'center' },
+  avatar: { width: scale(70), height: scale(70), borderRadius: 35, backgroundColor: '#ddd', marginRight: scale(12) },
+  username: { fontSize: moderateScale(18), fontWeight: '700' },
+  bio: { fontSize: moderateScale(12), color: '#666', marginVertical: 4 },
+  editBtn: { backgroundColor: '#eee', paddingHorizontal: scale(12), paddingVertical: scale(6), borderRadius: 8 },
+  editText: { fontSize: 12, fontWeight: '600' },
+  stats: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: scale(12) },
+  statItem: { alignItems: 'center' },
+  statValue: { fontWeight: '700', fontSize: 16 },
+  statLabel: { fontSize: 11, color: '#666' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: scale(8) },
+  recipeCard: { width: '31%', aspectRatio: 1, margin: '1%', borderRadius: 12, overflow: 'hidden', backgroundColor: '#ddd' },
+  recipeImage: { width: '100%', height: '100%', borderRadius: 12 },
+  heart: { position: 'absolute', top: 8, right: 8 },
 });
