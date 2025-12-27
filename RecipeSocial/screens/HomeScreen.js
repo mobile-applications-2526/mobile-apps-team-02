@@ -59,6 +59,7 @@ export default function HomeScreen({ navigation }) {
           loading={loading}
           searchQuery={searchQuery}
           selectedCategory={selectedCategory}
+          navigation={navigation}
         />
       </ScrollView>
       <Navbar navigation={navigation} currentScreen="Home" />

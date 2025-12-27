@@ -15,6 +15,7 @@ import CollectionsScreen from './screens/CollectionsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import CreateScreen from './screens/CreateScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
+import RecipeDetailScreen from './screens/RecipeDetailScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -73,6 +74,7 @@ export default function App() {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Create" component={CreateScreen}/>
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
         </Stack.Navigator>
       </NavigationContainer>
    );
