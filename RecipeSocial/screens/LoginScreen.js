@@ -61,6 +61,9 @@ export default function LoginScreen({ navigation }) {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholder="Enter your email"
+            testID="login-email-input"
+            nativeID="login-email-input"
+            accessibilityLabel="login-email-input"
           />
         </View>
 
@@ -73,6 +76,9 @@ export default function LoginScreen({ navigation }) {
             onChangeText={setPassword}
             secureTextEntry
             placeholder="Enter your password"
+            testID="login-password-input"
+            nativeID="login-password-input"
+            accessibilityLabel="login-password-input"
           />
         </View>
 
@@ -82,6 +88,9 @@ export default function LoginScreen({ navigation }) {
             className="bg-gray-300 rounded-lg justify-center items-center"
             style={[styles.button, { height: verticalScale(60) }]}
             onPress={handleLogin}
+            testID="login-button"
+            nativeID="login-button"
+            accessibilityLabel="login-button"
           >
             <Text className="text-2xl font-bold">Login</Text>
           </TouchableOpacity>

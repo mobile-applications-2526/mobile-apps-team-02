@@ -120,6 +120,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                             key={recipe_categorie.recipe.id}
                                             style={styles.verticalCard}
                                             onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe_categorie.recipe.id })}
+                                            testID="recipe-card"
                                         >
                                             <Image
                                                 source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
@@ -155,6 +156,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                             key={recipe_categorie.recipe.id}
                                             style={styles.card}
                                             onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe_categorie.recipe.id })}
+                                            testID="recipe-card"
                                         >
                                             <Image
                                                 source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}

@@ -14,6 +14,9 @@ export default function Navbar() {
       <TouchableOpacity
         style={styles.buttons}
         onPress={() => navigation.navigate('Home')}
+        testID="nav-home"
+        nativeID="nav-home"
+        accessibilityLabel="nav-home"
       >
         <Ionicons name="home" size={moderateScale(28)} color="black" />
       </TouchableOpacity>
@@ -21,6 +24,9 @@ export default function Navbar() {
       <TouchableOpacity
         style={styles.buttons}
         onPress={() => navigation.navigate('Create')}
+        testID="nav-create"
+        nativeID="nav-create"
+        accessibilityLabel="nav-create"
       >
         <Ionicons name="add-outline" size={moderateScale(28)} color="black" />
       </TouchableOpacity>
@@ -28,6 +34,9 @@ export default function Navbar() {
       <TouchableOpacity
         style={styles.buttons}
         onPress={() => navigation.navigate('Collections')}
+        testID="nav-collections"
+        nativeID="nav-collections"
+        accessibilityLabel="nav-collections"
       >
         <Ionicons name="heart-outline" size={moderateScale(28)} color="black" />
       </TouchableOpacity>

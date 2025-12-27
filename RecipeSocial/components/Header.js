@@ -48,6 +48,9 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
                         value={searchQuery}
                         style={styles.searchInput}
                         placeholderTextColor="#999"
+                        testID="search-input"
+                        nativeID="search-input"
+                        accessibilityLabel="search-input"
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>

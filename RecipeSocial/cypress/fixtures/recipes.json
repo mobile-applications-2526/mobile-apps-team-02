@@ -1,0 +1,19 @@
+{
+  "sampleRecipes": [
+    {
+      "id": "1",
+      "title": "Beef Chili",
+      "description": "Hearty chili with beans and spices",
+      "difficulty": "medium",
+      "prep_time": 45
+    },
+    {
+      "id": "2",
+      "title": "Greek Salad",
+      "description": "Crisp salad with feta and olives",
+      "difficulty": "easy",
+      "prep_time": 10
+    }
+  ]
+}
+
