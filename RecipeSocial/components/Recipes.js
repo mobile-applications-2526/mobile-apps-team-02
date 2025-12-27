@@ -1,10 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { supabase } from '../lib/supabase';
 
 
 export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null }) {
+    const [favorites, setFavorites] = useState(new Set());
+
+    // Load user's favorites
+    useEffect(() => {
+        loadFavorites();
+    }, []);
+
+    const loadFavorites = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('favorites')
+                .select('recipe_id')
+                .eq('user_id', user.id);
+
+            if (!error && data) {
+                setFavorites(new Set(data.map(fav => fav.recipe_id)));
+            }
+        } catch (err) {
+            console.error('Error loading favorites:', err);
+        }
+    };
+
+    const toggleFavorite = async (recipeId) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                Alert.alert('Login Required', 'Please login to save favorites');
+                return;
+            }
+
+            const isFavorite = favorites.has(recipeId);
+
+            if (isFavorite) {
+                // Remove from favorites
+                const { error } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('recipe_id', recipeId);
+
+                if (error) {
+                    Alert.alert('Error', error.message);
+                } else {
+                    const newFavorites = new Set(favorites);
+                    newFavorites.delete(recipeId);
+                    setFavorites(newFavorites);
+                }
+            } else {
+                // Add to favorites
+                const { error } = await supabase
+                    .from('favorites')
+                    .insert({ user_id: user.id, recipe_id: recipeId });
+
+                if (error) {
+                    Alert.alert('Error', error.message);
+                } else {
+                    const newFavorites = new Set(favorites);
+                    newFavorites.add(recipeId);
+                    setFavorites(newFavorites);
+                }
+            }
+        } catch (err) {
+            console.error('Error toggling favorite:', err);
+        }
+    };
+
     // Filter categories and recipes based on search query and selected category
     const filteredData = CategoriesAndRecipes.map((category) => {
         // Filter recipes by search query
@@ -42,38 +113,58 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                         {isSelectedCategory ? (
                             // Vertical list for selected category
                             <View style={styles.verticalContainer}>
-                                {Category.recipe_categories.map((recipe_categorie) => (
-                                    <View key={recipe_categorie.recipe.id} style={styles.verticalCard}>
-                                        <Image
-                                            source={require('../assets/testRecipe.jpg')}
-                                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                                        />
-                                        <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
-                                            {recipe_categorie.recipe.title}
-                                        </Text>
-                                        <TouchableOpacity style={styles.cardIcon}>
-                                            <Ionicons name="heart-outline" size={moderateScale(28)} color="white" />
-                                        </TouchableOpacity>
-                                    </View>
-                                ))}
+                                {Category.recipe_categories.map((recipe_categorie) => {
+                                    const isFavorite = favorites.has(recipe_categorie.recipe.id);
+                                    return (
+                                        <View key={recipe_categorie.recipe.id} style={styles.verticalCard}>
+                                            <Image
+                                                source={require('../assets/testRecipe.jpg')}
+                                                style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                            />
+                                            <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
+                                                {recipe_categorie.recipe.title}
+                                            </Text>
+                                            <TouchableOpacity
+                                                style={styles.cardIcon}
+                                                onPress={() => toggleFavorite(recipe_categorie.recipe.id)}
+                                            >
+                                                <Ionicons
+                                                    name={isFavorite ? "heart" : "heart-outline"}
+                                                    size={moderateScale(28)}
+                                                    color={isFavorite ? "#ff4444" : "white"}
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                })}
                             </View>
                         ) : (
                             // Horizontal scroll for non-selected categories
                             <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}>
-                                {Category.recipe_categories.map((recipe_categorie) => (
-                                    <View key={recipe_categorie.recipe.id} style={styles.card}>
-                                        <Image
-                                            source={require('../assets/testRecipe.jpg')}
-                                            style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
-                                        />
-                                        <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
-                                            {recipe_categorie.recipe.title}
-                                        </Text>
-                                        <TouchableOpacity style={styles.cardIcon}>
-                                            <Ionicons name="heart-outline" size={moderateScale(28)} color="white" />
-                                        </TouchableOpacity>
-                                    </View>
-                                ))}
+                                {Category.recipe_categories.map((recipe_categorie) => {
+                                    const isFavorite = favorites.has(recipe_categorie.recipe.id);
+                                    return (
+                                        <View key={recipe_categorie.recipe.id} style={styles.card}>
+                                            <Image
+                                                source={require('../assets/testRecipe.jpg')}
+                                                style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                            />
+                                            <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
+                                                {recipe_categorie.recipe.title}
+                                            </Text>
+                                            <TouchableOpacity
+                                                style={styles.cardIcon}
+                                                onPress={() => toggleFavorite(recipe_categorie.recipe.id)}
+                                            >
+                                                <Ionicons
+                                                    name={isFavorite ? "heart" : "heart-outline"}
+                                                    size={moderateScale(28)}
+                                                    color={isFavorite ? "#ff4444" : "white"}
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                })}
                             </ScrollView>
                         )}
                     </View>
