@@ -114,7 +114,11 @@ export default function CollectionsScreen({ navigation }) {
         ) : (
           <View style={styles.gridContainer}>
             {filteredFavorites.map((favorite) => (
-              <View key={favorite.recipe_id} style={styles.card}>
+              <TouchableOpacity
+                key={favorite.recipe_id}
+                style={styles.card}
+                onPress={() => navigation.navigate('RecipeDetail', { recipeId: favorite.recipe_id })}
+              >
                 <Image
                   source={require('../assets/testRecipe.jpg')}
                   style={{ width: scale(126), height: scale(126), resizeMode: 'cover', borderRadius: 8 }}
@@ -124,7 +128,8 @@ export default function CollectionsScreen({ navigation }) {
                 </Text>
                 <TouchableOpacity
                   style={styles.cardIcon}
-                  onPress={() => {
+                  onPress={(e) => {
+                    e.stopPropagation();
                     Alert.alert(
                       'Remove from Collections',
                       `Remove "${favorite.recipes?.title}" from your collections?`,
@@ -141,7 +146,7 @@ export default function CollectionsScreen({ navigation }) {
                 >
                   <Ionicons name="heart" size={moderateScale(28)} color="#ff4444" />
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
