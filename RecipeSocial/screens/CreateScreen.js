@@ -4,10 +4,16 @@ import Navbar from "../components/Navbar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
 import Ingredients from '../components/create/Ingredients';
-
+import TextRecept from '../components/create/TextRecept';
+import { supabase } from '../lib/supabase';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 export default function CreateScreen() {
     const [image, setImage] = useState(null);
     const [step, setStep] = useState(0);
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [ingredients, setIngredients] = useState([]);
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library.
         // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
@@ -34,6 +40,79 @@ export default function CreateScreen() {
             setImage(result.assets[0].uri);
         }
     };
+
+
+    const handleSubmit = async () => {
+        try {
+            const {
+                data: { user },
+                error: userError,
+            } = await supabase.auth.getUser();
+
+            if (userError || !user) {
+                throw new Error("User not authenticated");
+            }
+
+            let imageUrl = image;
+
+            // Upload only if it's a local file
+            if (image && image.startsWith("file://")) {
+                imageUrl = await uploadRecipeImage(image);
+            }
+            const recipeData = {
+                title,
+                description,
+                ingredients,
+                image,
+            }
+            const { data: recipe, error: recipeError } = await supabase
+                .from('recipes')
+                .insert({
+                    user_id: user.id,
+                    title,
+                    description,
+                    image_url: imageUrl,
+                })
+                .select()
+                .single();
+            if (recipeError) throw recipeError;
+            const ingredientRows = ingredients.map((i) => ({
+                recipe_id: recipe.id,
+                ingredient: i.ingredient,
+                quantity: i.size,
+            }));
+            const { error: ingredientError } = await supabase
+                .from("recipe_ingredients")
+                .insert(ingredientRows);
+
+            if (ingredientError) throw ingredientError;
+            Alert.alert("Success", "Recipe saved!");
+        } catch (err) {
+            console.error(err);
+            Alert.alert("Error", "Could not save recipe");
+        }
+    };
+
+    const uploadRecipeImage = async (uri) => {
+        const fileExt = uri.split('.').pop() || 'jpg';
+        const filePath = `${uuidv4()}.${fileExt}`;
+
+        const response = await fetch(uri);
+        const arrayBuffer = await response.arrayBuffer();
+
+        const { error } = await supabase.storage
+            .from('recipe-images')
+            .upload(filePath, arrayBuffer, { upsert: false, contentType: 'image/*' });
+
+        if (error) throw error;
+
+        const { data } = supabase.storage.from('recipe-images').getPublicUrl(filePath);
+        return data.publicUrl;
+    };
+
+
+
+
     useEffect(() => {
         pickImage();
     }, []);
@@ -43,11 +122,11 @@ export default function CreateScreen() {
                 {image && (
                     <View>
                         {image && step === 0 && (
-                            <Ingredients onNext={() => setStep(1)} />
+                            <Ingredients ingredients={ingredients} setIngredients={setIngredients} onNext={() => setStep(1)} />
                         )}
 
                         {image && step === 1 && (
-                            <NextComponent onBack={() => setStep(0)} />
+                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onShare={handleSubmit} />
                         )}
                     </View>)}
             </View>
@@ -59,7 +138,6 @@ export default function CreateScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
         justifyContent: 'center',
     },
     image: {

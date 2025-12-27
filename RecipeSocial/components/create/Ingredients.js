@@ -2,19 +2,21 @@ import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpaci
 import { useState } from 'react';
 import { moderateScale, scale } from '../../utils/scaling';
 
-export default function Ingredients({ onNext }) {
+export default function Ingredients({ ingredients,
+    setIngredients, onNext }) {
     const [newIngredient, setNewIngredient] = useState({
         ingredient: "",
         size: "",
     });
-
-    const [ingredients, setIngredients] = useState([]);
     const addIngredient = () => {
         if (!newIngredient.ingredient || !newIngredient.size) return;
 
         setIngredients((prev) => [...prev, newIngredient]);
         setNewIngredient({ ingredient: "", size: "" });
     };
+    const canNext =
+        ingredients.length > 0;
+
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', }}>
             <Text style={styles.title}>Add Ingredients</Text>
@@ -63,8 +65,9 @@ export default function Ingredients({ onNext }) {
                     </TouchableOpacity>
                 </View>
             </View>
-            <TouchableOpacity style={styles.NextBtn} onPress={onNext}>
-                <Text style={styles.addText}>Next</Text>
+            <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
+                onPress={onNext} disabled={!canNext}>
+                <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
             </TouchableOpacity>
         </View>
     );
@@ -144,4 +147,11 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontSize: 16,
     },
+    NextBtnDisabled: {
+        opacity: 0.5,
+    },
+    addTextDisabled: {
+        opacity: 0.7,
+    },
+
 });
