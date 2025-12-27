@@ -5,7 +5,7 @@ import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
 
 
-export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null }) {
+export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation }) {
     const [favorites, setFavorites] = useState(new Set());
 
     // Load user's favorites
@@ -116,17 +116,24 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                 {Category.recipe_categories.map((recipe_categorie) => {
                                     const isFavorite = favorites.has(recipe_categorie.recipe.id);
                                     return (
-                                        <View key={recipe_categorie.recipe.id} style={styles.verticalCard}>
+                                        <TouchableOpacity
+                                            key={recipe_categorie.recipe.id}
+                                            style={styles.verticalCard}
+                                            onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe_categorie.recipe.id })}
+                                        >
                                             <Image
-                                                source={require('../assets/testRecipe.jpg')}
-                                                style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                                source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
+                                                style={{ width: scale(126), height: scale(126), resizeMode: 'cover' }}
                                             />
                                             <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                                                 {recipe_categorie.recipe.title}
                                             </Text>
                                             <TouchableOpacity
                                                 style={styles.cardIcon}
-                                                onPress={() => toggleFavorite(recipe_categorie.recipe.id)}
+                                                onPress={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavorite(recipe_categorie.recipe.id);
+                                                }}
                                             >
                                                 <Ionicons
                                                     name={isFavorite ? "heart" : "heart-outline"}
@@ -134,7 +141,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                                     color={isFavorite ? "#ff4444" : "white"}
                                                 />
                                             </TouchableOpacity>
-                                        </View>
+                                        </TouchableOpacity>
                                     );
                                 })}
                             </View>
@@ -144,17 +151,24 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                 {Category.recipe_categories.map((recipe_categorie) => {
                                     const isFavorite = favorites.has(recipe_categorie.recipe.id);
                                     return (
-                                        <View key={recipe_categorie.recipe.id} style={styles.card}>
+                                        <TouchableOpacity
+                                            key={recipe_categorie.recipe.id}
+                                            style={styles.card}
+                                            onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe_categorie.recipe.id })}
+                                        >
                                             <Image
-                                                source={require('../assets/testRecipe.jpg')}
-                                                style={{ width: scale(126), height: scale(126), resizeMode: 'fit' }}
+                                                source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
+                                                style={{ width: scale(126), height: scale(126), resizeMode: 'cover' }}
                                             />
                                             <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                                                 {recipe_categorie.recipe.title}
                                             </Text>
                                             <TouchableOpacity
                                                 style={styles.cardIcon}
-                                                onPress={() => toggleFavorite(recipe_categorie.recipe.id)}
+                                                onPress={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavorite(recipe_categorie.recipe.id);
+                                                }}
                                             >
                                                 <Ionicons
                                                     name={isFavorite ? "heart" : "heart-outline"}
@@ -162,7 +176,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                                     color={isFavorite ? "#ff4444" : "white"}
                                                 />
                                             </TouchableOpacity>
-                                        </View>
+                                        </TouchableOpacity>
                                     );
                                 })}
                             </ScrollView>
