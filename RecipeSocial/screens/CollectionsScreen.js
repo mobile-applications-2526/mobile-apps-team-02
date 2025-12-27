@@ -89,14 +89,14 @@ export default function CollectionsScreen({ navigation }) {
     <SafeAreaView className="flex-1 bg-white">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} navigation={navigation} />
 
-      <View style={{ paddingHorizontal: scale(10), paddingTop: verticalScale(10) }}>
+      <View style={{ paddingHorizontal: scale(10), paddingTop: verticalScale(5) }}>
         <Text className="text-3xl font-bold">My Collections</Text>
-        <Text className="text-gray-500 mt-2">
+        <Text className="text-gray-500 mt-1">
           {filteredFavorites.length} {filteredFavorites.length === 1 ? 'recipe' : 'recipes'}
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(120), paddingTop: verticalScale(20) }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(100), paddingTop: verticalScale(10) }}>
         {loading ? (
           <View style={{ padding: scale(20), alignItems: 'center' }}>
             <Text style={{ fontSize: moderateScale(16), color: '#666' }}>Loading...</Text>
@@ -121,7 +121,7 @@ export default function CollectionsScreen({ navigation }) {
               >
                 <Image
                   source={require('../assets/testRecipe.jpg')}
-                  style={{ width: scale(126), height: scale(126), resizeMode: 'cover', borderRadius: 8 }}
+                  style={{ width: scale(170), height: scale(170), resizeMode: 'cover', borderRadius: 8 }}
                 />
                 <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                   {favorite.recipes?.title || 'Untitled'}
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'relative',
-    width: scale(126),
+    width: scale(170),
     marginBottom: scale(10),
   },
   cardText: {
