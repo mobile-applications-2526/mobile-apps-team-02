@@ -4,7 +4,7 @@ import { moderateScale, scale, verticalScale } from "../utils/scaling";
 import { supabase } from '../lib/supabase';
 import { useState } from 'react';
 
-export default function Header({ searchQuery = '', setSearchQuery = () => {}, navigation }) {
+export default function Header({ searchQuery = '', setSearchQuery = () => { }, navigation }) {
     const [showMenu, setShowMenu] = useState(false);
 
     const handleLogout = async () => {
@@ -57,11 +57,11 @@ export default function Header({ searchQuery = '', setSearchQuery = () => {}, na
                 </View>
             </View>
             <View style={styles.profile}>
-                <View style={{gap: scale(1) , alignItems: 'center', flexDirection: 'row', }}>
+                <View style={{ gap: scale(1), alignItems: 'center', flexDirection: 'row', }}>
                     <Text>1</Text>
                     <Ionicons name="flame-outline" size={scale(25)} color="black" />
                 </View>
-                <TouchableOpacity onPress={handleLogout} activeOpacity={0.7}>
+                <TouchableOpacity onPress={() => navigation.navigate('Profile')  /* !setShowMenu(prev => !prev) */} activeOpacity={0.7}>
                     <Image
                         source={require('../assets/pfp.jpg')}
                         style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
@@ -69,6 +69,12 @@ export default function Header({ searchQuery = '', setSearchQuery = () => {}, na
                     />
                 </TouchableOpacity>
             </View>
+            {showMenu && (
+                <View style={styles.menu}>
+                   <Text></Text>
+                </View>
+            )}
+
         </View>
     )
 }
@@ -76,7 +82,7 @@ const styles = StyleSheet.create({
     header: {
         height: verticalScale(75),
         padding: moderateScale(10),
-        
+
     },
     searchContainer: {
         flexDirection: 'row',
