@@ -2,41 +2,38 @@ import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, Alert } fro
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale, scale, verticalScale } from "../utils/scaling";
 import { supabase } from '../lib/supabase';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 
 export default function Header({ searchQuery = '', setSearchQuery = () => { }, navigation }) {
     const [showMenu, setShowMenu] = useState(false);
+    const [profile, setProfile] = useState(null);
 
-    const handleLogout = async () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: async () => {
-                        const { error } = await supabase.auth.signOut();
-                        if (error) {
-                            Alert.alert('Error', error.message);
-                        } else {
-                            if (navigation) {
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{ name: 'Start' }],
-                                });
-                            }
-                        }
-                    },
-                },
-            ]
-        );
-    };
+    const getUserProfile = async () => {
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
 
+        if (userError || !user) {
+            throw new Error("User not authenticated");
+        }
+        const { data, error } = await supabase
+            .from('userinfo')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        setProfile(data);
+    }
+    useEffect(() => {
+        getUserProfile();
+    }, []);
     return (
         <View className="flex-row items-center justify-between" style={styles.header}>
             <View className="flex-1">
@@ -66,7 +63,11 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate('Profile')  /* !setShowMenu(prev => !prev) */} activeOpacity={0.7}>
                     <Image
-                        source={require('../assets/pfp.jpg')}
+                        source={
+                            profile?.avatar_url
+                                ? { uri: profile.avatar_url }
+                                : require('../assets/pfp.jpg')
+                        }
                         style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
                         resizeMode="cover"
                     />
@@ -74,7 +75,7 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
             </View>
             {showMenu && (
                 <View style={styles.menu}>
-                   <Text></Text>
+                    <Text></Text>
                 </View>
             )}
 
