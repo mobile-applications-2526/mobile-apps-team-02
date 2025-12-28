@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function EditProfileScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -147,7 +148,13 @@ export default function EditProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+      <View style={{ flexDirection: "row", gap: moderateScale(10)}}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={moderateScale(28)} color="#333" />
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Edit Profile</Text>
+      </View>
 
       {/* Avatar */}
       <TouchableOpacity onPress={pickImage} style={styles.avatarWrapper}>

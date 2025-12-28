@@ -2,7 +2,6 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { Ionicons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Navbar() {
