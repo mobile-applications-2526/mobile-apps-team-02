@@ -4,9 +4,9 @@ import { moderateScale, scale } from '../../utils/scaling';
 export default function TextRecept({ title,
     setTitle,
     description,
-    setDescription, onShare }) {
+    setDescription, onNext }) {
 
-    const canShare =
+    const canNext =
         title.trim().length > 0 && description.trim().length > 0;
 
     return (
@@ -26,16 +26,9 @@ export default function TextRecept({ title,
                 value={description}
                 onChangeText={(text) => setDescription(text)}
             />
-            <TouchableOpacity
-                style={[styles.NextBtn, !canShare && styles.NextBtnDisabled]}
-                onPress={() => {
-                    onShare();
-                }}
-                disabled={!canShare}
-            >
-                <Text style={[styles.addText, !canShare && styles.addTextDisabled]}>
-                    Share
-                </Text>
+            <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
+                onPress={onNext} disabled={!canNext}>
+                <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
             </TouchableOpacity>
         </View>
     )
