@@ -8,12 +8,19 @@ import TextRecept from '../components/create/TextRecept';
 import { supabase } from '../lib/supabase';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import Details from '../components/create/Details';
 export default function CreateScreen() {
     const [image, setImage] = useState(null);
     const [step, setStep] = useState(0);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [ingredients, setIngredients] = useState([]);
+
+    const [categories, setCategories] = useState([]);
+    const [selected, setSelected] = useState([]);
+    const [difficulty, setDifficulty] = useState('');
+    const [prepTime, setPrepTime] = useState('');
+
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library.
         // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
@@ -59,23 +66,28 @@ export default function CreateScreen() {
             if (image && image.startsWith("file://")) {
                 imageUrl = await uploadRecipeImage(image);
             }
-            const recipeData = {
-                title,
-                description,
-                ingredients,
-                image,
-            }
+
             const { data: recipe, error: recipeError } = await supabase
                 .from('recipes')
                 .insert({
                     user_id: user.id,
                     title,
                     description,
+                    difficulty,
+                    prep_time: prepTime,
                     image_url: imageUrl,
                 })
                 .select()
                 .single();
             if (recipeError) throw recipeError;
+            const categoryRows = selected.map((catId) => ({
+                recipe_id: recipe.id,
+                category_id: catId,
+            }));
+            const { error: categoryError } = await supabase
+                .from("recipe_categories")
+                .insert(categoryRows);
+            if (categoryError) throw categoryError;
             const ingredientRows = ingredients.map((i) => ({
                 recipe_id: recipe.id,
                 ingredient: i.ingredient,
@@ -126,7 +138,10 @@ export default function CreateScreen() {
                         )}
 
                         {image && step === 1 && (
-                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onShare={handleSubmit} />
+                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onNext={() => setStep(2)} />
+                        )}
+                        {image && step === 2 && (
+                            <Details categories={categories} setCategories={setCategories} selected={selected} setSelected={setSelected} difficulty={difficulty} setDifficulty={setDifficulty} prepTime={prepTime} setPrepTime={setPrepTime} onShare={handleSubmit} />
                         )}
                     </View>)}
             </View>
