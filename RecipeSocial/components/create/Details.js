@@ -32,7 +32,7 @@ export default function Details({ categories, setCategories, selected, setSelect
 
     return (
         <View style={{ alignItems: 'center' }}>
-            <Text style={styles.title}>Add Ingrediesnts</Text>
+            <Text style={styles.title}>Add Details</Text>
             <View style={styles.container}>
                 <ScrollView>
                     {categories.map((cat) => {
