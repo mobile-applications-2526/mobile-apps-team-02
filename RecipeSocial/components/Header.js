@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 
 
 export default function Header({ searchQuery = '', setSearchQuery = () => { }, navigation }) {
-    const [showMenu, setShowMenu] = useState(false);
     const [profile, setProfile] = useState(null);
 
     const getUserProfile = async () => {
@@ -73,12 +72,6 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
                     />
                 </TouchableOpacity>
             </View>
-            {showMenu && (
-                <View style={styles.menu}>
-                    <Text></Text>
-                </View>
-            )}
-
         </View>
     )
 }

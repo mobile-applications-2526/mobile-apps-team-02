@@ -35,10 +35,10 @@ export default function CreateScreen() {
         }
 
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images', 'videos'],
+            mediaTypes: ['images'],
             allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
+            aspect: [1, 1],
+            quality:  0.7,
         });
 
         console.log(result);
