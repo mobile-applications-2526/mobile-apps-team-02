@@ -138,10 +138,10 @@ export default function CreateScreen() {
                         )}
 
                         {image && step === 1 && (
-                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onNext={() => setStep(2)} />
+                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onNext={() => setStep(2)}  onBack={() => setStep(0)}/>
                         )}
                         {image && step === 2 && (
-                            <Details categories={categories} setCategories={setCategories} selected={selected} setSelected={setSelected} difficulty={difficulty} setDifficulty={setDifficulty} prepTime={prepTime} setPrepTime={setPrepTime} onShare={handleSubmit} />
+                            <Details categories={categories} setCategories={setCategories} selected={selected} setSelected={setSelected} difficulty={difficulty} setDifficulty={setDifficulty} prepTime={prepTime} setPrepTime={setPrepTime}  onBack={() => setStep(1)} onShare={handleSubmit} />
                         )}
                     </View>)}
             </View>

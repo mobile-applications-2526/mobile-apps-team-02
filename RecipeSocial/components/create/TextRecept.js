@@ -4,10 +4,11 @@ import { moderateScale, scale } from '../../utils/scaling';
 export default function TextRecept({ title,
     setTitle,
     description,
-    setDescription, onNext }) {
+    setDescription, onNext, onBack }) {
 
     const canNext =
         title.trim().length > 0 && description.trim().length > 0;
+    
 
     return (
         <View style={styles.screen}>
@@ -26,10 +27,16 @@ export default function TextRecept({ title,
                 value={description}
                 onChangeText={(text) => setDescription(text)}
             />
-            <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
-                onPress={onNext} disabled={!canNext}>
-                <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
-            </TouchableOpacity>
+            <View style={{flexDirection: 'row',  justifyContent: 'space-between',}}>
+                <TouchableOpacity style={[styles.NextBtn]}
+                    onPress={onBack}>
+                    <Text style={[styles.addText]}>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
+                    onPress={onNext} disabled={!canNext}>
+                    <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }

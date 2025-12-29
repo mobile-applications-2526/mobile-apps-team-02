@@ -5,7 +5,7 @@ import { moderateScale, scale } from '../../utils/scaling';
 import { Picker } from '@react-native-picker/picker';
 
 
-export default function Details({ categories, setCategories, selected, setSelected, difficulty, setDifficulty, prepTime, setPrepTime, onShare }) {
+export default function Details({ categories, setCategories, selected, setSelected, difficulty, setDifficulty, prepTime, setPrepTime, onShare, onBack }) {
 
     const getCategories = async () => {
         const { data, error } = await supabase
@@ -31,7 +31,7 @@ export default function Details({ categories, setCategories, selected, setSelect
     const canShare = selected.length > 0 && difficulty && prepTime;
 
     return (
-        <View style={{ alignItems: 'center' }}>
+        <View style={{ }}>
             <Text style={styles.title}>Add Details</Text>
             <View style={styles.container}>
                 <ScrollView>
@@ -84,21 +84,29 @@ export default function Details({ categories, setCategories, selected, setSelect
                     />
                 </View>
             </View>
-            <TouchableOpacity style={[styles.shareBtn, !canShare && styles.shareBtnDisabled]}
-                onPress={() => onShare()} disabled={!canShare}>
-                <Text style={[styles.addText, !canShare && styles.addTextDisabled]}>Share</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                <TouchableOpacity style={[styles.NextBtn]}
+                    onPress={onBack}>
+                    <Text style={[styles.addText]}>Back</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.shareBtn, !canShare && styles.shareBtnDisabled]}
+                    onPress={() => onShare()} disabled={!canShare}>
+                    <Text style={[styles.addText, !canShare && styles.addTextDisabled]}>Share</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     title: {
+        alignSelf: 'center',
         fontSize: 24,
         fontWeight: "700",
         marginBottom: 12,
     },
     container: {
+        alignSelf: "center",
         backgroundColor: "#F3FFF4",
         borderRadius: scale(10),
         padding: scale(10),
@@ -172,5 +180,14 @@ const styles = StyleSheet.create({
     },
     addTextDisabled: {
         opacity: 0.7,
+    },
+    NextBtn: {
+        backgroundColor: "#6e6e6e",
+        margin: moderateScale(10),
+        paddingVertical: 12,
+        borderRadius: 10,
+        height: moderateScale(50),
+        width: scale(137),
+        alignSelf: "flex-end"
     },
 })
