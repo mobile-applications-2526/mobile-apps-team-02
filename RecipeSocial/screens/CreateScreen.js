@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import Details from '../components/create/Details';
-export default function CreateScreen() {
+export default function CreateScreen({navigation}) {
     const [image, setImage] = useState(null);
     const [step, setStep] = useState(0);
     const [title, setTitle] = useState("");
@@ -38,8 +38,12 @@ export default function CreateScreen() {
             mediaTypes: ['images'],
             allowsEditing: true,
             aspect: [1, 1],
-            quality:  0.7,
+            quality: 0.7,
         });
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+            navigation.goBack();
+            return;
+        }
 
         console.log(result);
 
@@ -138,10 +142,10 @@ export default function CreateScreen() {
                         )}
 
                         {image && step === 1 && (
-                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onNext={() => setStep(2)}  onBack={() => setStep(0)}/>
+                            <TextRecept title={title} setTitle={setTitle} description={description} setDescription={setDescription} onNext={() => setStep(2)} onBack={() => setStep(0)} />
                         )}
                         {image && step === 2 && (
-                            <Details categories={categories} setCategories={setCategories} selected={selected} setSelected={setSelected} difficulty={difficulty} setDifficulty={setDifficulty} prepTime={prepTime} setPrepTime={setPrepTime}  onBack={() => setStep(1)} onShare={handleSubmit} />
+                            <Details categories={categories} setCategories={setCategories} selected={selected} setSelected={setSelected} difficulty={difficulty} setDifficulty={setDifficulty} prepTime={prepTime} setPrepTime={setPrepTime} onBack={() => setStep(1)} onShare={handleSubmit} />
                         )}
                     </View>)}
             </View>
