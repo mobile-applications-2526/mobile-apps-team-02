@@ -68,6 +68,8 @@ export default function Details({ categories, setCategories, selected, setSelect
                             <Picker.Item label="Easy" value="easy" />
                             <Picker.Item label="Medium" value="medium" />
                             <Picker.Item label="Hard" value="hard" />
+                            <Picker.Item label="Very Hard" value="very_hard" />
+                            <Picker.Item label="Extreme" value="extreme" />
                         </Picker>
                     </View>
                     <Text style={styles.label}>PrepTime</Text>

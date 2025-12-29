@@ -238,7 +238,9 @@ export default function RecipeDetailScreen({ route, navigation }) {
       'easy': 1,
       'medium': 2,
       'hard': 3,
-      'very easy': 1,
+      'very_hard': 4,
+      'extreme': 5,
+      'very_easy': 1,
     };
     const stars = difficultyMap[difficulty?.toLowerCase()] || 1;
 
