@@ -385,7 +385,11 @@ export default function RecipeDetailScreen({ route, navigation }) {
                   comments.map((comment) => (
                     <View key={comment.id} style={styles.commentItem}>
                       <View style={styles.commentHeader}>
-                        <View style={styles.commentAvatar}>
+                        {/* Avatar */}
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate('Profile', { userId: comment.user?.id })}
+                          style={styles.commentAvatar}
+                        >
                           {comment.user?.avatar_url ? (
                             <Image
                               source={{ uri: comment.user.avatar_url }}
@@ -394,20 +398,28 @@ export default function RecipeDetailScreen({ route, navigation }) {
                           ) : (
                             <Ionicons name="person-circle" size={moderateScale(40)} color="#ccc" />
                           )}
-                        </View>
-                        <View style={styles.commentInfo}>
+                        </TouchableOpacity>
+
+                        {/* Username */}
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate('Profile', { userId: comment.user?.id })}
+                          style={styles.commentInfo}
+                        >
                           <Text style={styles.commentUsername}>
                             {comment.user?.username || 'Anonymous'}
                           </Text>
                           <Text style={styles.commentDate}>
                             {new Date(comment.created_at).toLocaleDateString()}
                           </Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
+
                       <Text style={styles.commentContent}>{comment.content}</Text>
                     </View>
                   ))
                 )}
+
+
               </View>
             </>
           )}
