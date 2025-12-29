@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
+import IngredientsList from '../components/IngredientsList';
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipeId } = route.params;
@@ -334,7 +335,6 @@ export default function RecipeDetailScreen({ route, navigation }) {
               {/* Title and Rating */}
               <View style={styles.titleContainer}>
                 <Text style={styles.title}>{recipe.title}</Text>
-                <Text style={styles.description}>{recipe.description}</Text>
                 <View style={styles.metaContainer}>
                   <View style={styles.metaItem}>
                     <Text style={styles.metaLabel}>Difficulty:</Text>
@@ -347,30 +347,11 @@ export default function RecipeDetailScreen({ route, navigation }) {
                     </View>
                   )}
                 </View>
+                <IngredientsList ingredients={ingredients} />
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: moderateScale(10) }}>Instructions</Text>
+                <Text style={styles.description}>{recipe.description}</Text>
+                
               </View>
-
-              {/* Ingredients */}
-              {ingredients.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Ingredients</Text>
-                  {ingredients.map((item, index) => (
-                    <View key={index} style={styles.ingredientItem}>
-                      <Ionicons name="checkmark-circle" size={moderateScale(20)} color="#7CC57E" />
-                      <Text style={styles.ingredientText}>
-                        {item.quantity} {item.ingredient}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {/* Instructions */}
-              {recipe.instructions && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Instructions</Text>
-                  <Text style={styles.instructionsText}>{recipe.instructions}</Text>
-                </View>
-              )}
             </>
           ) : (
             <>
@@ -569,7 +550,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(28),
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(1),
   },
   description: {
     fontSize: moderateScale(16),
