@@ -120,7 +120,11 @@ export default function CollectionsScreen({ navigation }) {
                 onPress={() => navigation.navigate('RecipeDetail', { recipeId: favorite.recipe_id })}
               >
                 <Image
-                  source={require('../assets/testRecipe.jpg')}
+                  source={
+                    favorite.recipes?.image_url
+                      ? { uri: favorite.recipes.image_url }
+                      : require('../assets/testRecipe.jpg')
+                  }
                   style={{ width: scale(170), height: scale(170), resizeMode: 'cover', borderRadius: 8 }}
                 />
                 <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
@@ -148,6 +152,7 @@ export default function CollectionsScreen({ navigation }) {
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
+
           </View>
         )}
       </ScrollView>
