@@ -56,9 +56,10 @@ export default function HomeScreen({ navigation }) {
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
         <Recipes
           CategoriesAndRecipes={CategoriesAndRecipes}
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleCategorySelect}
           loading={loading}
           searchQuery={searchQuery}
-          selectedCategory={selectedCategory}
           navigation={navigation}
         />
       </ScrollView>

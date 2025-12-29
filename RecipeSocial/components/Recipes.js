@@ -5,7 +5,8 @@ import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
 
 
-export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation }) {
+
+export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation, onCategorySelect = () => { } }) {
     const [favorites, setFavorites] = useState(new Set());
 
     // Load user's favorites
@@ -106,9 +107,19 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
 
                 return (
                     <View key={Category.id}>
-                        <Text style={{ paddingHorizontal: scale(10) }} className="text-2xl font-bold mt-4">
-                            {Category.name}
-                        </Text>
+                        <TouchableOpacity
+                            onPress={() => onCategorySelect(Category.id)}
+                            style={styles.categoryHeader}
+                        >
+                            <Text style={styles.categoryTitle}>
+                                {Category.name}
+                            </Text>
+                            <Ionicons
+                                name={isSelectedCategory ? "chevron-up" : "chevron-down"}
+                                size={moderateScale(20)}
+                                color="#000"
+                            />
+                        </TouchableOpacity>
 
                         {isSelectedCategory ? (
                             // Vertical list for selected category
@@ -197,6 +208,19 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
     )
 }
 const styles = StyleSheet.create({
+    categoryHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: scale(10),
+        paddingTop: scale(10),   // replaces mt-4
+        gap: scale(6),
+    },
+
+    categoryTitle: {
+        fontSize: moderateScale(24),
+        fontWeight: 'bold',
+    },
+
     cardrow: {
         paddingHorizontal: scale(10),
         gap: scale(10),
