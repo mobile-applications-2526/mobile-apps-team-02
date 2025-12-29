@@ -9,7 +9,7 @@ export default function Ingredients({ ingredients,
         size: "",
     });
     const addIngredient = () => {
-        if (!newIngredient.ingredient || !newIngredient.size) return;
+        if (!newIngredient.ingredient) return;
 
         setIngredients((prev) => [...prev, newIngredient]);
         setNewIngredient({ ingredient: "", size: "" });
