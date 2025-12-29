@@ -13,6 +13,7 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
@@ -277,26 +278,29 @@ export default function RecipeDetailScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
-          <Ionicons name="arrow-back" size={moderateScale(28)} color="#333" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
-          <Ionicons
-            name={isFavorite ? "heart" : "heart-outline"}
-            size={moderateScale(28)}
-            color={isFavorite ? "#ff4444" : "#333"}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Recipe Image */}
+      {/* Image + Header */}
       <View style={styles.imageContainer}>
         <Image
           source={recipe.image_url ? { uri: recipe.image_url } : require('../assets/testRecipe.jpg')}
           style={styles.recipeImage}
         />
+
+        {/* Header on top of image */}
+        <View style={styles.headerOverlay}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
+            <Ionicons name="arrow-back" size={moderateScale(28)} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={moderateScale(28)}
+              color={isFavorite ? "#ff4444" : "#fff"}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
+
 
       {/* Tabs */}
       <View style={styles.tabsContainer}>
@@ -453,6 +457,18 @@ export default function RecipeDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(12), // SafeAreaView already handles status bar
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -499,9 +515,10 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: verticalScale(250),
-    backgroundColor: '#f0f0f0',
+    height: verticalScale(330),
+    overflow: 'hidden', // 👈 IMPORTANT
   },
+
   recipeImage: {
     width: '100%',
     height: '100%',
@@ -511,6 +528,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    backgroundColor: '#DAFFDB',
+    borderTopRightRadius: moderateScale(15),
+    borderTopLeftRadius: moderateScale(15),
+    marginTop: -moderateScale(20),
   },
   tab: {
     flex: 1,
@@ -533,9 +554,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    backgroundColor: '#F3FFF4',
   },
   contentContainer: {
     paddingBottom: verticalScale(20),
+
   },
   titleContainer: {
     paddingHorizontal: scale(16),
