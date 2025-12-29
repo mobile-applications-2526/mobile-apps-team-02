@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
+import { Ionicons } from '@expo/vector-icons';
+import AuthHeader from '../components/AuthHeader';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -36,6 +38,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { paddingHorizontal: scale(10) }]}>
+      <AuthHeader/>
       <Image
         source={require('../assets/Logo2.png')}
         style={{ width: scale(350), height: verticalScale(100), resizeMode: 'contain' }}
@@ -107,8 +110,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: 'rgba(124, 197, 126, 0.1)', 
-    borderRadius: scale(10),  
+    backgroundColor: 'rgba(124, 197, 126, 0.1)',
+    borderRadius: scale(10),
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',

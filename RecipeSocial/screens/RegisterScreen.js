@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
+import AuthHeader from '../components/AuthHeader';
 
 export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -48,6 +49,7 @@ export default function RegisterScreen({ navigation }) {
       className="bg-white flex-1 items-center"
       style={{ paddingHorizontal: scale(10) }}
     >
+      <AuthHeader/>
       <Image
         source={require('../assets/Logo2.png')}
         style={{ width: scale(350), height: verticalScale(100), resizeMode: 'contain' }}
