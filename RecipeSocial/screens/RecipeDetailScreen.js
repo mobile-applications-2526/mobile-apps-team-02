@@ -51,7 +51,12 @@ export default function RecipeDetailScreen({ route, navigation }) {
       // Fetch recipe details
       const { data: recipeData, error: recipeError } = await supabase
         .from('recipes')
-        .select('*')
+        .select(`*,   user:userinfo!recipes_user_id_fkey (
+          id,
+         username,
+         avatar_url
+         )
+          `)
         .eq('id', recipeId)
         .single();
 
@@ -302,6 +307,30 @@ export default function RecipeDetailScreen({ route, navigation }) {
             />
           </TouchableOpacity>
         </View>
+        <View style={styles.authorContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Profile', { userId: recipe.user?.id })}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={
+                recipe.user?.avatar_url
+                  ? { uri: recipe.user.avatar_url }
+                  : require('../assets/pfp.jpg')
+              }
+              style={styles.authorAvatar}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Profile', { userId: recipe.user?.id })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.authorName}>
+              {recipe.user?.username}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
 
 
@@ -352,7 +381,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
                 <IngredientsList ingredients={ingredients} />
                 <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: moderateScale(10) }}>Instructions</Text>
                 <Text style={styles.description}>{recipe.description}</Text>
-                
+
               </View>
             </>
           ) : (
@@ -683,5 +712,32 @@ const styles = StyleSheet.create({
   sendButton: {
     padding: scale(8),
   },
+  authorContainer: {
+    position: 'absolute',
+    bottom: moderateScale(25),
+    left: scale(16),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(10),
+    zIndex: 10,
+  },
+
+  authorAvatar: {
+    width: scale(55),
+    height: scale(55),
+    borderRadius: scale(64),
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+
+  authorName: {
+    color: '#fff',
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
 });
 
