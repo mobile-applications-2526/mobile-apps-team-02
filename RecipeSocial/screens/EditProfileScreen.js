@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function EditProfileScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -40,13 +41,14 @@ export default function EditProfileScreen({ navigation }) {
 
     const { data } = await supabase
       .from('userinfo')
-      .select('username, avatar_url')
+      .select('username, avatar_url, bio')
       .eq('id', user.id)
       .single();
 
     if (data) {
       setUsername(data.username);
       setAvatar(data.avatar_url);
+      setBio(data.bio || '');
     }
 
     setLoading(false);
@@ -100,7 +102,6 @@ export default function EditProfileScreen({ navigation }) {
 
     let avatarUrl = avatar;
 
-    // Upload avatar if changed
     if (avatar && avatar.startsWith('file://')) {
       try {
         avatarUrl = await uploadAvatar(avatar, user.id);
@@ -111,10 +112,9 @@ export default function EditProfileScreen({ navigation }) {
       }
     }
 
-    // Update profile table
     const { error } = await supabase
       .from('userinfo')
-      .update({ username, avatar_url: avatarUrl })
+      .update({ username, avatar_url: avatarUrl, bio })
       .eq('id', user.id);
 
     if (error) {
@@ -123,7 +123,6 @@ export default function EditProfileScreen({ navigation }) {
       return;
     }
 
-    // Update email if changed
     if (email !== user.email) {
       const { error: emailError } = await supabase.auth.updateUser({ email });
       if (emailError) {
@@ -179,6 +178,17 @@ export default function EditProfileScreen({ navigation }) {
         keyboardType="email-address"
       />
 
+      {/* Bio */}
+      <Text style={styles.label}>Bio</Text>
+      <TextInput
+        value={bio}
+        onChangeText={setBio}
+        style={styles.bioInput}
+        multiline={true}
+        numberOfLines={4}
+        placeholder="Tell us something about yourself..."
+      />
+
       <TouchableOpacity
         style={styles.saveBtn}
         onPress={saveChanges}
@@ -202,6 +212,16 @@ const styles = StyleSheet.create({
     padding: scale(12),
     marginBottom: scale(16),
     fontSize: 14,
+  },
+  bioInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: scale(12),
+    marginBottom: scale(16),
+    fontSize: 14,
+    textAlignVertical: 'top',
+    minHeight: scale(80),
   },
   saveBtn: {
     backgroundColor: '#7CC57E',
