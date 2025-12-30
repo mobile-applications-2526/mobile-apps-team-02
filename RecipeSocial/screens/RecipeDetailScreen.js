@@ -201,6 +201,60 @@ export default function RecipeDetailScreen({ route, navigation }) {
     }
   };
 
+  const deleteRecipe = async () => {
+    Alert.alert(
+      'Delete Recipe',
+      'Are you sure you want to delete this recipe? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+
+              if (!user) {
+                Alert.alert('Error', 'You must be logged in to delete recipes');
+                return;
+              }
+
+              console.log('Attempting to delete recipe:', recipeId, 'by user:', user.id);
+
+              // Delete the recipe - ensure user owns it
+              const { error } = await supabase
+                .from('recipes')
+                .delete()
+                .eq('id', recipeId)
+                .eq('user_id', user.id);
+
+              if (error) {
+                console.error('Delete error:', JSON.stringify(error, null, 2));
+                throw error;
+              }
+
+              console.log('Recipe deleted successfully');
+
+              // Navigate back immediately without alert for better UX
+              navigation.goBack();
+
+              // Show success toast/alert after navigation
+              setTimeout(() => {
+                Alert.alert('Success', 'Recipe deleted successfully');
+              }, 100);
+            } catch (error) {
+              console.error('Error deleting recipe:', error);
+              Alert.alert('Error', `Failed to delete recipe: ${error.message || 'Unknown error'}`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const submitComment = async () => {
     if (!newComment.trim()) {
       return; // Just return silently if empty
@@ -299,13 +353,20 @@ export default function RecipeDetailScreen({ route, navigation }) {
             <Ionicons name="arrow-back" size={moderateScale(28)} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
-            <Ionicons
-              name={isFavorite ? "heart" : "heart-outline"}
-              size={moderateScale(28)}
-              color={isFavorite ? "#ff4444" : "#fff"}
-            />
-          </TouchableOpacity>
+          <View style={styles.headerRightIcons}>
+            {currentUser && recipe.user_id === currentUser.id && (
+              <TouchableOpacity onPress={deleteRecipe} style={styles.deleteIcon}>
+                <Ionicons name="trash-outline" size={moderateScale(28)} color="#fff" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={moderateScale(28)}
+                color={isFavorite ? "#ff4444" : "#fff"}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.authorContainer}>
           <TouchableOpacity
@@ -479,6 +540,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: scale(16),
     paddingTop: verticalScale(12), // SafeAreaView already handles status bar
+  },
+  headerRightIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deleteIcon: {
+    padding: scale(8),
+    marginRight: scale(4),
   },
 
   container: {

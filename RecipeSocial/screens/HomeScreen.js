@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 import Header from '../components/Header';
 import Recipes from '../components/Recipes';
@@ -15,8 +16,10 @@ export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const getCategoriesAndRecipes = async () => {
+    console.log('HomeScreen: Loading categories and recipes... (refreshKey:', refreshKey, ')');
     setLoading(true);
     const { data, error } = await supabase
       .from('categories')
@@ -31,13 +34,20 @@ export default function HomeScreen({ navigation }) {
     if (error) {
       Alert.alert('Error', error.message);
     } else {
+      console.log('HomeScreen: Loaded', data?.length || 0, 'categories');
       setCategoriesAndRecipes(data);
     }
     setLoading(false);
   };
-  useEffect(() => {
-    getCategoriesAndRecipes();
-  }, []);
+
+  // Load and refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('HomeScreen: useFocusEffect triggered');
+      setRefreshKey(prev => prev + 1);
+      getCategoriesAndRecipes();
+    }, [])
+  );
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
@@ -53,7 +63,7 @@ export default function HomeScreen({ navigation }) {
           onCategorySelect={handleCategorySelect}
         />
       </ScrollView>
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }} key={refreshKey}>
         <Recipes
           CategoriesAndRecipes={CategoriesAndRecipes}
           selectedCategory={selectedCategory}

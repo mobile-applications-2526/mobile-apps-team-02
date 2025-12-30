@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 import Header from '../components/Header';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
@@ -11,8 +12,10 @@ export default function CollectionsScreen({ navigation }) {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const getFavorites = async () => {
+    console.log('CollectionsScreen: Loading favorites... (refreshKey:', refreshKey, ')');
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -39,6 +42,7 @@ export default function CollectionsScreen({ navigation }) {
         console.error('Error fetching favorites:', error);
         Alert.alert('Error', error.message);
       } else {
+        console.log('CollectionsScreen: Loaded', data?.length || 0, 'favorites');
         setFavorites(data || []);
       }
     } catch (err) {
@@ -47,9 +51,14 @@ export default function CollectionsScreen({ navigation }) {
     setLoading(false);
   };
 
-  useEffect(() => {
-    getFavorites();
-  }, []);
+  // Load and refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('CollectionsScreen: useFocusEffect triggered');
+      setRefreshKey(prev => prev + 1);
+      getFavorites();
+    }, [])
+  );
 
   const removeFavorite = async (recipeId) => {
     try {
@@ -96,7 +105,7 @@ export default function CollectionsScreen({ navigation }) {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(100), paddingTop: verticalScale(10) }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(100), paddingTop: verticalScale(10) }} key={refreshKey}>
         {loading ? (
           <View style={{ padding: scale(20), alignItems: 'center' }}>
             <Text style={{ fontSize: moderateScale(16), color: '#666' }}>Loading...</Text>

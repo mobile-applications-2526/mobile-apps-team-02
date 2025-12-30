@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Navbar from '../components/Navbar';
 import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -23,19 +24,14 @@ export default function ProfileScreen() {
   const [stats, setStats] = useState({ followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false); // <-- FOLLOW STATE
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const userId = route.params?.userId; // Optional userId for viewing other users
+  const userId = route.params?.userId;
 
   useEffect(() => {
     getCurrentUser();
   }, []);
-
-  useEffect(() => {
-    if (currentUser) {
-      fetchProfileAndRecipes();
-    }
-  }, [currentUser, userId]);
 
   useEffect(() => {
     if (route.params?.newAvatar) {
@@ -43,17 +39,31 @@ export default function ProfileScreen() {
     }
   }, [route.params?.newAvatar]);
 
+  // Refresh profile and recipes when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('ProfileScreen: useFocusEffect triggered');
+      if (currentUser) {
+        setRefreshKey(prev => prev + 1);
+        fetchProfileAndRecipes();
+      }
+    }, [currentUser, userId])
+  );
+
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUser(user);
   };
 
   const fetchProfileAndRecipes = async () => {
+    console.log('ProfileScreen: Fetching profile and recipes... (refreshKey:', refreshKey, ')');
     setLoading(true);
 
     try {
       let idToFetch = userId || currentUser?.id;
       if (!idToFetch) return;
+
+      console.log('ProfileScreen: Fetching for user ID:', idToFetch);
 
       // Profile
       const { data: profileData, error: profileError } = await supabase
@@ -69,7 +79,10 @@ export default function ProfileScreen() {
         .select('*')
         .eq('user_id', idToFetch)
         .order('created_at', { ascending: false });
-      if (!recipesError) setRecipes(recipesData || []);
+      if (!recipesError) {
+        console.log('ProfileScreen: Loaded', recipesData?.length || 0, 'recipes');
+        setRecipes(recipesData || []);
+      }
 
       // Followers / Following counts
       const { count: followersCount } = await supabase
@@ -138,6 +151,54 @@ export default function ProfileScreen() {
     }
   };
 
+  const deleteRecipe = async (recipeId) => {
+    Alert.alert(
+      'Delete Recipe',
+      'Are you sure you want to delete this recipe? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              if (!currentUser) {
+                Alert.alert('Error', 'You must be logged in to delete recipes');
+                return;
+              }
+
+              console.log('Attempting to delete recipe:', recipeId, 'by user:', currentUser.id);
+
+              // Delete the recipe - ensure user owns it
+              const { data, error } = await supabase
+                .from('recipes')
+                .delete()
+                .eq('id', recipeId)
+                .eq('user_id', currentUser.id);
+
+              if (error) {
+                console.error('Delete error:', JSON.stringify(error, null, 2));
+                throw error;
+              }
+
+              console.log('Delete successful:', data);
+
+              // Refresh recipes list
+              await fetchProfileAndRecipes();
+              Alert.alert('Success', 'Recipe deleted successfully');
+            } catch (error) {
+              console.error('Error deleting recipe:', error);
+              Alert.alert('Error', `Failed to delete recipe: ${error.message || 'Unknown error'}`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -150,7 +211,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }} key={refreshKey}>
         {/* Header */}
         <View style={styles.header}>
           <Image
@@ -230,6 +291,17 @@ export default function ProfileScreen() {
                 }
                 style={styles.recipeImage}
               />
+              {isOwnProfile && (
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    deleteRecipe(recipe.id);
+                  }}
+                >
+                  <Ionicons name="trash" size={18} color="#fff" />
+                </TouchableOpacity>
+              )}
               <Ionicons
                 name="heart"
                 size={18}
@@ -271,4 +343,15 @@ const styles = StyleSheet.create({
   recipeCard: { width: '31%', aspectRatio: 1, margin: '1%', borderRadius: 12, overflow: 'hidden', backgroundColor: '#ddd' },
   recipeImage: { width: '100%', height: '100%', borderRadius: 12 },
   heart: { position: 'absolute', top: 8, right: 8 },
+  deleteButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 76, 76, 0.9)',
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
