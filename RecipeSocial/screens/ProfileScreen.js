@@ -271,8 +271,12 @@ export default function ProfileScreen() {
         <View style={styles.stats}>
           <Stat label="Reputation" value={profile?.reputation || 0} />
           <Stat label="Recipes" value={recipes.length} />
-          <Stat label="Followers" value={stats.followers} />
-          <Stat label="Following" value={stats.following} />
+          <TouchableOpacity onPress={() => navigation.navigate('Followers', { userId: profile?.id })}>
+            <Stat label="Followers" value={stats.followers} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Following', { userId: profile?.id })}>
+            <Stat label="Following" value={stats.following} />
+          </TouchableOpacity>
         </View>
 
         {/* Recipe Grid */}
