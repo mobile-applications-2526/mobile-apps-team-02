@@ -136,7 +136,7 @@ export default function CreateScreen({navigation}) {
         <SafeAreaView className="flex-1 bg-white">
             <View style={styles.container}>
                 {image && (
-                    <View>
+                    <View style={{ flex:1, }}>
                         {image && step === 0 && (
                             <Ingredients ingredients={ingredients} setIngredients={setIngredients} onNext={() => setStep(1)} />
                         )}
@@ -157,7 +157,7 @@ export default function CreateScreen({navigation}) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        
     },
     image: {
         width: 200,

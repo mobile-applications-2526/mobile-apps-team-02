@@ -1,4 +1,8 @@
-import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import {
+    Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView,
+    KeyboardAvoidingView, Platform
+} from 'react-native';
+
 import { useState } from 'react';
 import { moderateScale, scale } from '../../utils/scaling';
 
@@ -8,6 +12,7 @@ export default function Ingredients({ ingredients,
         ingredient: "",
         size: "",
     });
+    const canAdd = newIngredient.ingredient.trim().length > 0;
     const addIngredient = () => {
         if (!newIngredient.ingredient) return;
 
@@ -18,58 +23,73 @@ export default function Ingredients({ ingredients,
         ingredients.length > 0;
 
     return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', }}>
+        <View style={{ flex: 1, alignItems: 'center', paddingTop: moderateScale(30) }}>
             <Text style={styles.title}>Add Ingredients</Text>
+
             <View style={styles.container}>
-                <ScrollView style={styles.list}>
-                    {ingredients.map((item, index) => (
-                        <View key={index} style={styles.row}>
-                            <View style={[styles.readonlyBox, { flex: 2 }]}>
-                                <Text numberOfLines={1}>{item.ingredient}</Text>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 105 : 105}
+                >
+                    <ScrollView style={styles.list} >
+                        {ingredients.map((item, index) => (
+                            <View key={index} style={styles.row}>
+                                <View style={[styles.readonlyBox, { flex: 2 }]}>
+                                    <Text numberOfLines={1}>{item.ingredient}</Text>
+                                </View>
+
+                                <View style={[styles.readonlyBox, { flex: 1 }]}>
+                                    <Text numberOfLines={1}>{item.size}</Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={styles.removeBtn}
+                                    onPress={() => setIngredients((prev) => prev.filter((_, i) => i !== index))}
+                                >
+                                    <Text style={styles.removeText}>Remove</Text>
+                                </TouchableOpacity>
                             </View>
+                        ))}
+                    </ScrollView>
+                    <View style={styles.addingContainer}>
+                        <View style={styles.divider} />
 
-                            <View style={[styles.readonlyBox, { flex: 1 }]}>
-                                <Text numberOfLines={1}>{item.size}</Text>
-                            </View>
+                        <Text style={styles.label}>Ingredient</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder='e.g. butter'
+                            value={newIngredient.ingredient}
+                            onChangeText={(text) =>
+                                setNewIngredient((prev) => ({ ...prev, ingredient: text }))
+                            }
+                        />
+                        <Text style={styles.label}>quantity (optional)</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="e.g. 2 tbsp / 200 g"
+                            value={newIngredient.size}
+                            onChangeText={(text) =>
+                                setNewIngredient((prev) => ({ ...prev, size: text }))
+                            }
+                        />
+                        <TouchableOpacity
+                            style={[styles.addBtn, !canAdd && styles.addBtnDisabled]}
+                            onPress={addIngredient}
+                            disabled={!canAdd}
+                        >
+                            <Text style={[styles.addText, !canAdd && styles.addTextDisabled]}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
 
-                            <TouchableOpacity
-                                style={styles.removeBtn}
-                                onPress={() => setIngredients((prev) => prev.filter((_, i) => i !== index))}
-                            >
-                                <Text style={styles.removeText}>Remove</Text>
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>
-                <View style={styles.addingContainer}>
-                    <View style={styles.divider} />
-
-                    <Text style={styles.label}>Ingredient</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={newIngredient.ingredient}
-                        onChangeText={(text) =>
-                            setNewIngredient((prev) => ({ ...prev, ingredient: text }))
-                        }
-                    />
-                    <Text style={styles.label}>size</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={newIngredient.size}
-                        onChangeText={(text) =>
-                            setNewIngredient((prev) => ({ ...prev, size: text }))
-                        }
-                    />
-                    <TouchableOpacity style={styles.addBtn} onPress={addIngredient}>
-                        <Text style={styles.addText}>Add</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
             <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
                 onPress={onNext} disabled={!canNext}>
                 <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
             </TouchableOpacity>
-        </View>
+
+        </View >
     );
 }
 const styles = StyleSheet.create({
@@ -77,11 +97,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#F3FFF4",
         borderRadius: scale(10),
         padding: scale(10),
-        width: scale(373),
-        height: moderateScale(543),
+        flex: 1,
+        width: "100%",
+        maxWidth: scale(373),
+        maxHeight: moderateScale(600),
     },
     list: {
-        flex: 1,
+       
     },
     addingContainer: {
         justifyContent: "flex-end",
@@ -131,6 +153,9 @@ const styles = StyleSheet.create({
         height: moderateScale(50),
         width: scale(137),
         alignSelf: "flex-end"
+    },
+    addBtnDisabled: {
+        opacity: 0.5,
     },
     NextBtn: {
         backgroundColor: "#6e6e6e",

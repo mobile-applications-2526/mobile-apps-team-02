@@ -43,7 +43,8 @@ export default function TextRecept({ title,
 
 const styles = StyleSheet.create({
     screen: {
-        paddingHorizontal: 10,
+        paddingHorizontal: scale(10),
+        paddingVertical: moderateScale(20),
     },
     title: {
         alignSelf: 'center',
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         padding: 15,
-        height: moderateScale(456),
+        height: moderateScale(550),
     },
     NextBtn: {
         backgroundColor: "#6e6e6e",

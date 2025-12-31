@@ -1,4 +1,6 @@
-import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, isChecked } from 'react-native';
+import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, isChecked,
+    KeyboardAvoidingView, Platform
+ } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useState, useEffect } from 'react';
 import { moderateScale, scale } from '../../utils/scaling';
@@ -31,60 +33,66 @@ export default function Details({ categories, setCategories, selected, setSelect
     const canShare = selected.length > 0 && difficulty && prepTime;
 
     return (
-        <View style={{ }}>
+        <View style={{ flex: 1, paddingVertical: moderateScale(20), }}>
             <Text style={styles.title}>Add Details</Text>
             <View style={styles.container}>
-                <ScrollView>
-                    {categories.map((cat) => {
-                        const isChecked = selected.includes(cat.id);
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 105 : 105}
+                >
+                    <ScrollView>
+                        {categories.map((cat) => {
+                            const isChecked = selected.includes(cat.id);
 
-                        return (
-                            <TouchableOpacity
-                                key={cat.id}
-                                style={styles.row}
-                                onPress={() => toggleItem(cat.id)}
-                                activeOpacity={0.7}
+                            return (
+                                <TouchableOpacity
+                                    key={cat.id}
+                                    style={styles.row}
+                                    onPress={() => toggleItem(cat.id)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={[styles.checkbox, isChecked && styles.checked]}>
+                                        {isChecked && <Text style={styles.check}>✓</Text>}
+                                    </View>
+
+                                    <Text style={styles.label}>{cat.name}</Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                    <View style={styles.Container2}>
+                        <View style={styles.divider} />
+
+                        <Text style={styles.label}>Difficulty</Text>
+                        <View style={styles.pickerWrapper}>
+                            <Picker
+                                selectedValue={difficulty}
+                                onValueChange={(value) => setDifficulty(value)}
                             >
-                                <View style={[styles.checkbox, isChecked && styles.checked]}>
-                                    {isChecked && <Text style={styles.check}>✓</Text>}
-                                </View>
-
-                                <Text style={styles.label}>{cat.name}</Text>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </ScrollView>
-                <View style={styles.Container2}>
-                    <View style={styles.divider} />
-
-                    <Text style={styles.label}>Difficulty</Text>
-                    <View style={styles.pickerWrapper}>
-                        <Picker
-                            selectedValue={difficulty}
-                            onValueChange={(value) => setDifficulty(value)}
-                        >
-                            <Picker.Item label="Select difficulty" value="" />
-                            <Picker.Item label="Very Easy" value="very_easy" />
-                            <Picker.Item label="Easy" value="easy" />
-                            <Picker.Item label="Medium" value="medium" />
-                            <Picker.Item label="Hard" value="hard" />
-                            <Picker.Item label="Very Hard" value="very_hard" />
-                            <Picker.Item label="Extreme" value="extreme" />
-                        </Picker>
+                                <Picker.Item label="Select difficulty" value="" />
+                                <Picker.Item label="Very Easy" value="very_easy" />
+                                <Picker.Item label="Easy" value="easy" />
+                                <Picker.Item label="Medium" value="medium" />
+                                <Picker.Item label="Hard" value="hard" />
+                                <Picker.Item label="Very Hard" value="very_hard" />
+                                <Picker.Item label="Extreme" value="extreme" />
+                            </Picker>
+                        </View>
+                        <Text style={styles.label}>PrepTime</Text>
+                        <TextInput
+                            style={styles.input}
+                            keyboardType="number-pad"
+                            inputMode="numeric"
+                            value={prepTime}
+                            onChangeText={(text) => {
+                                const numeric = text.replace(/[^0-9]/g, '');
+                                setPrepTime(numeric);
+                            }}
+                            placeholder="e.g. 30"
+                        />
                     </View>
-                    <Text style={styles.label}>PrepTime</Text>
-                    <TextInput
-                        style={styles.input}
-                        keyboardType="number-pad"
-                        inputMode="numeric"
-                        value={prepTime}
-                        onChangeText={(text) => {
-                            const numeric = text.replace(/[^0-9]/g, '');
-                            setPrepTime(numeric);
-                        }}
-                        placeholder="e.g. 30"
-                    />
-                </View>
+                </KeyboardAvoidingView>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                 <TouchableOpacity style={[styles.NextBtn]}
