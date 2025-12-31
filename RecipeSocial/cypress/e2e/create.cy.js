@@ -40,4 +40,7 @@ describe('Create Recipe Flow', () => {
 
         cy.contains('Test Recipe').should('exist');
     });
+    afterEach(() => {
+        cy.task('deleteTestRecipe');
+    });
 });
