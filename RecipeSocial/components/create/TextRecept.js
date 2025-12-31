@@ -16,6 +16,7 @@ export default function TextRecept({ title,
             <TextInput
                 style={styles.input}
                 placeholder="Title"
+                returnKeyType="done"
                 value={title}
                 onChangeText={(title) => setTitle(title)}
             />
@@ -23,7 +24,9 @@ export default function TextRecept({ title,
                 style={styles.Description}
                 placeholder="Description"
                 multiline
+                returnKeyType="done"
                 textAlignVertical="top"
+                blurOnSubmit={false}
                 value={description}
                 onChangeText={(text) => setDescription(text)}
             />

@@ -60,6 +60,7 @@ export default function Ingredients({ ingredients,
                             style={styles.input}
                             placeholder='e.g. butter'
                             value={newIngredient.ingredient}
+                            returnKeyType="done"
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, ingredient: text }))
                             }
@@ -68,6 +69,7 @@ export default function Ingredients({ ingredients,
                         <TextInput
                             style={styles.input}
                             placeholder="e.g. 2 tbsp / 200 g"
+                            returnKeyType="done"
                             value={newIngredient.size}
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, size: text }))
