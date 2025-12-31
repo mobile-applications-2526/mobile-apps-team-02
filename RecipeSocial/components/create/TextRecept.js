@@ -1,6 +1,6 @@
 import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { moderateScale, scale } from '../../utils/scaling';
+import { moderateScale, scale, verticalScale } from '../../utils/scaling';
 export default function TextRecept({ title,
     setTitle,
     description,
@@ -17,6 +17,7 @@ export default function TextRecept({ title,
                 style={styles.input}
                 placeholder="Title"
                 returnKeyType="done"
+                testID="recipe-title-input"
                 value={title}
                 onChangeText={(title) => setTitle(title)}
             />
@@ -26,17 +27,18 @@ export default function TextRecept({ title,
                 multiline
                 returnKeyType="done"
                 textAlignVertical="top"
+                testID="recipe-description-input"
                 blurOnSubmit={false}
                 value={description}
                 onChangeText={(text) => setDescription(text)}
             />
             <View style={{flexDirection: 'row',  justifyContent: 'space-between',}}>
                 <TouchableOpacity style={[styles.NextBtn]}
-                    onPress={onBack}>
+                    onPress={onBack} testID="text-back-button">
                     <Text style={[styles.addText]}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
-                    onPress={onNext} disabled={!canNext}>
+                    onPress={onNext} disabled={!canNext} testID="text-next-button">
                     <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
                 </TouchableOpacity>
             </View>
@@ -47,7 +49,7 @@ export default function TextRecept({ title,
 const styles = StyleSheet.create({
     screen: {
         paddingHorizontal: scale(10),
-        paddingVertical: moderateScale(20),
+        paddingVertical: verticalScale(20),
     },
     title: {
         alignSelf: 'center',
@@ -61,6 +63,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         padding: 15,
+        height: verticalScale(50),
         marginBottom: scale(10),
 
     },
@@ -69,14 +72,14 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         padding: 15,
-        height: moderateScale(550),
+        height: verticalScale(550),
     },
     NextBtn: {
         backgroundColor: "#6e6e6e",
-        margin: moderateScale(10),
+        margin: verticalScale(10),
         paddingVertical: 12,
         borderRadius: 10,
-        height: moderateScale(50),
+        height: verticalScale(50),
         width: scale(137),
         alignSelf: "flex-end"
     },

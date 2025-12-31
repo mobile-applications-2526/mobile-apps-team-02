@@ -3,7 +3,7 @@ import { Alert, Button, Image, Text, View, StyleSheet, TextInput, TouchableOpaci
  } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useState, useEffect } from 'react';
-import { moderateScale, scale } from '../../utils/scaling';
+import { moderateScale, scale, verticalScale } from '../../utils/scaling';
 import { Picker } from '@react-native-picker/picker';
 
 
@@ -51,6 +51,7 @@ export default function Details({ categories, setCategories, selected, setSelect
                                     style={styles.row}
                                     onPress={() => toggleItem(cat.id)}
                                     activeOpacity={0.7}
+                                    testID={`category-${cat.id}`}
                                 >
                                     <View style={[styles.checkbox, isChecked && styles.checked]}>
                                         {isChecked && <Text style={styles.check}>✓</Text>}
@@ -69,6 +70,7 @@ export default function Details({ categories, setCategories, selected, setSelect
                             <Picker
                                 selectedValue={difficulty}
                                 onValueChange={(value) => setDifficulty(value)}
+                                testID="difficulty-picker"
                             >
                                 <Picker.Item label="Select difficulty" value="" />
                                 <Picker.Item label="Very Easy" value="very_easy" />
@@ -85,6 +87,7 @@ export default function Details({ categories, setCategories, selected, setSelect
                             keyboardType="number-pad"
                             inputMode="numeric"
                             value={prepTime}
+                            testID="prep-time-input"
                             onChangeText={(text) => {
                                 const numeric = text.replace(/[^0-9]/g, '');
                                 setPrepTime(numeric);
@@ -96,11 +99,11 @@ export default function Details({ categories, setCategories, selected, setSelect
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                 <TouchableOpacity style={[styles.NextBtn]}
-                    onPress={onBack}>
+                    onPress={onBack} testID="details-back-button">
                     <Text style={[styles.addText]}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.shareBtn, !canShare && styles.shareBtnDisabled]}
-                    onPress={() => onShare()} disabled={!canShare}>
+                    onPress={() => onShare()} disabled={!canShare} testID="share-button">
                     <Text style={[styles.addText, !canShare && styles.addTextDisabled]}>Share</Text>
                 </TouchableOpacity>
             </View>
@@ -121,7 +124,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(10),
         padding: scale(10),
         width: scale(373),
-        height: moderateScale(543),
+        height: verticalScale(543),
     },
     Container2: {
         justifyContent: "flex-end",

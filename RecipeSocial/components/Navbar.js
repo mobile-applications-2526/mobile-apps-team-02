@@ -17,7 +17,7 @@ export default function Navbar() {
         nativeID="nav-home"
         accessibilityLabel="nav-home"
       >
-        <Ionicons name="home" size={moderateScale(28)} color="black" />
+        <Ionicons name="home" size={verticalScale(28)} color="black" />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -27,7 +27,7 @@ export default function Navbar() {
         nativeID="nav-create"
         accessibilityLabel="nav-create"
       >
-        <Ionicons name="add-outline" size={moderateScale(28)} color="black" />
+        <Ionicons name="add-outline" size={verticalScale(28)} color="black" />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -37,7 +37,7 @@ export default function Navbar() {
         nativeID="nav-collections"
         accessibilityLabel="nav-collections"
       >
-        <Ionicons name="heart-outline" size={moderateScale(28)} color="black" />
+        <Ionicons name="heart-outline" size={verticalScale(28)} color="black" />
       </TouchableOpacity>
 
     </View>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: scale(10),
     width: scale(373),
-    height: moderateScale(70),
+    height: verticalScale(70),
     paddingHorizontal: scale(20),
     backgroundColor: '#7CC57E',
     alignItems: 'center',
@@ -60,10 +60,10 @@ const styles = StyleSheet.create({
     bottom: verticalScale(10),
   },
   buttons: {
-    width: scale(50),
+    width: verticalScale(50),
     height: verticalScale(50),
     backgroundColor: '#fff8e1',
-    borderRadius: 50,
+    borderRadius: 70,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,

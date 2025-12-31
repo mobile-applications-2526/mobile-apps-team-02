@@ -1,6 +1,9 @@
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
+  env: {
+    E2E: true
+  },
   e2e: {
     baseUrl: 'http://localhost:8081', // Expo web default port
     setupNodeEvents(on, config) {
@@ -17,8 +20,8 @@ module.exports = defineConfig({
     specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/component.js',
   },
-  viewportWidth: 375, // Mobile viewport width
-  viewportHeight: 667, // Mobile viewport height
+  viewportWidth: 412, // Mobile viewport width
+  viewportHeight: 924, // Mobile viewport height
   video: true,
   screenshotOnRunFailure: true,
 });

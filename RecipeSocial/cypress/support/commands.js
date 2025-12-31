@@ -89,6 +89,17 @@ Cypress.Commands.add('waitForApp', () => {
   cy.wait(2000); // Wait for app initialization
 });
 
+
+
+Cypress.Commands.add('addIngredient', (name, qty) => {
+  cy.get('[data-testid="ingredient-name-input"]').type(name);
+  if (qty) {
+    cy.get('[data-testid="ingredient-qty-input"]').type(qty);
+  }
+  cy.get('[data-testid="ingredient-add-button"]').click();
+});
+
+
 // -- Example of overwriting existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 

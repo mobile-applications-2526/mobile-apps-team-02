@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 
 import { useState } from 'react';
-import { moderateScale, scale } from '../../utils/scaling';
+import { moderateScale, scale, verticalScale } from '../../utils/scaling';
 
 export default function Ingredients({ ingredients,
     setIngredients, onNext }) {
@@ -23,7 +23,7 @@ export default function Ingredients({ ingredients,
         ingredients.length > 0;
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', paddingTop: moderateScale(30) }}>
+        <View style={{ flex: 1, alignItems: 'center', paddingTop: verticalScale(20) }}>
             <Text style={styles.title}>Add Ingredients</Text>
 
             <View style={styles.container}>
@@ -60,6 +60,7 @@ export default function Ingredients({ ingredients,
                             style={styles.input}
                             placeholder='e.g. butter'
                             value={newIngredient.ingredient}
+                            testID="ingredient-name-input"
                             returnKeyType="done"
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, ingredient: text }))
@@ -71,6 +72,7 @@ export default function Ingredients({ ingredients,
                             placeholder="e.g. 2 tbsp / 200 g"
                             returnKeyType="done"
                             value={newIngredient.size}
+                            testID="ingredient-qty-input"
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, size: text }))
                             }
@@ -79,6 +81,7 @@ export default function Ingredients({ ingredients,
                             style={[styles.addBtn, !canAdd && styles.addBtnDisabled]}
                             onPress={addIngredient}
                             disabled={!canAdd}
+                            testID="ingredient-add-button"
                         >
                             <Text style={[styles.addText, !canAdd && styles.addTextDisabled]}>Add</Text>
                         </TouchableOpacity>
@@ -87,7 +90,7 @@ export default function Ingredients({ ingredients,
 
             </View>
             <TouchableOpacity style={[styles.NextBtn, !canNext && styles.NextBtnDisabled]}
-                onPress={onNext} disabled={!canNext}>
+                onPress={onNext} disabled={!canNext} testID="ingredients-next-button">
                 <Text style={[styles.addText, !canNext && styles.addTextDisabled]}>Next</Text>
             </TouchableOpacity>
 
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
         maxWidth: scale(373),
-        maxHeight: moderateScale(600),
+        maxHeight: verticalScale(600),
     },
     list: {
        
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         padding: 15,
-        marginBottom: scale(10),
+        marginBottom: verticalScale(10),
     },
     removeBtn: {
         backgroundColor: "#8c8c8c",
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
     divider: {
         height: 1,
         backgroundColor: "#ccc",
-        marginBottom: scale(15),
+        marginBottom: verticalScale(15),
     },
     label: {
         fontSize: 22,

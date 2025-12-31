@@ -67,7 +67,7 @@ export default function Header({ searchQuery = '', setSearchQuery = () => { }, n
                                 ? { uri: profile.avatar_url }
                                 : require('../assets/pfp.jpg')
                         }
-                        style={{ width: scale(55), height: verticalScale(55), borderRadius: scale(100) }}
+                        style={{ width: verticalScale(55), height: verticalScale(55), borderRadius: scale(100) }}
                         resizeMode="cover"
                     />
                 </TouchableOpacity>

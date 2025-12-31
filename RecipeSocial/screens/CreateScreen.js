@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import Details from '../components/create/Details';
-export default function CreateScreen({navigation}) {
+export default function CreateScreen({ navigation }) {
     const [image, setImage] = useState(null);
     const [step, setStep] = useState(0);
     const [title, setTitle] = useState("");
@@ -103,6 +103,7 @@ export default function CreateScreen({navigation}) {
 
             if (ingredientError) throw ingredientError;
             Alert.alert("Success", "Recipe saved!");
+            navigation.navigate("Home");
         } catch (err) {
             console.error(err);
             Alert.alert("Error", "Could not save recipe");
@@ -127,16 +128,24 @@ export default function CreateScreen({navigation}) {
     };
 
 
-
-
     useEffect(() => {
-        pickImage();
+        const isE2E =
+            typeof window !== 'undefined' &&
+            window.Cypress;
+
+        if (isE2E || process.env.NODE_ENV === 'test') {
+            // Fake image for Cypress
+            setImage('https://test-image.local/fake.jpg');
+        } else {
+            pickImage();
+        }
     }, []);
+
     return (
         <SafeAreaView className="flex-1 bg-white">
             <View style={styles.container}>
                 {image && (
-                    <View style={{ flex:1, }}>
+                    <View style={{ flex: 1, }}>
                         {image && step === 0 && (
                             <Ingredients ingredients={ingredients} setIngredients={setIngredients} onNext={() => setStep(1)} />
                         )}
@@ -157,7 +166,7 @@ export default function CreateScreen({navigation}) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        
+
     },
     image: {
         width: 200,
