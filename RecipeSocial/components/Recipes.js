@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
 
 
-
+const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation, onCategorySelect = () => { } }) {
     const [favorites, setFavorites] = useState(new Set());
-
     // Load user's favorites
     useEffect(() => {
         loadFavorites();
@@ -135,7 +134,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                         >
                                             <Image
                                                 source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
-                                                style={{ width: scale(126), height: scale(126), resizeMode: 'cover' }}
+                                                style={{ width: '100%', height: CARD_WIDTH, resizeMode: 'cover', borderRadius: 8}}
                                             />
                                             <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                                                 {recipe_categorie.recipe.title}
@@ -171,7 +170,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                         >
                                             <Image
                                                 source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
-                                                style={{ width: scale(126), height: scale(126), resizeMode: 'cover' }}
+                                                style={{ width: scale(126), height: scale(126), resizeMode: 'cover', borderRadius: 8 }}
                                             />
                                             <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                                                 {recipe_categorie.recipe.title}
@@ -238,24 +237,23 @@ const styles = StyleSheet.create({
     },
     verticalCard: {
         position: 'relative',
-        textAlign: 'center',
-        width: scale(126),
+        width: CARD_WIDTH,
         marginBottom: scale(10),
     },
     cardText: {
         position: 'absolute',
-        bottom: 10,
-        left: 4,
+        bottom: verticalScale(10),
+        left: scale(4),
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-
+        right: scale(4),
         borderRadius: 5,
         padding: 4,
         color: 'white',
     },
     cardIcon: {
         position: 'absolute',
-        top: 5,
-        right: 4,
+        top: verticalScale(5),
+        right: scale(4),
         borderColor: 'black',
         padding: 0,
         color: 'white',

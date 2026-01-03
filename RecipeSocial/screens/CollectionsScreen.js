@@ -5,9 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 import Header from '../components/Header';
-import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
 
+const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function CollectionsScreen({ navigation }) {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -134,7 +135,7 @@ export default function CollectionsScreen({ navigation }) {
                       ? { uri: favorite.recipes.image_url }
                       : require('../assets/testRecipe.jpg')
                   }
-                  style={{ width: scale(170), height: scale(170), resizeMode: 'cover', borderRadius: 8 }}
+                  style={{ width: '100%', height: CARD_WIDTH, resizeMode: 'cover', borderRadius: 8 }}
                 />
                 <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
                   {favorite.recipes?.title || 'Untitled'}
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'relative',
-    width: scale(170),
+    width: CARD_WIDTH,
     marginBottom: scale(10),
   },
   cardText: {
