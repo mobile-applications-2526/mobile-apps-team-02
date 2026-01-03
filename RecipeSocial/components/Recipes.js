@@ -3,7 +3,7 @@ import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, Styl
 import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
-
+import VerticalRecipe from './VerticalRecipe';
 
 const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation, onCategorySelect = () => { } }) {
@@ -122,40 +122,14 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
 
                         {isSelectedCategory ? (
                             // Vertical list for selected category
-                            <View style={styles.verticalContainer}>
-                                {Category.recipe_categories.map((recipe_categorie) => {
-                                    const isFavorite = favorites.has(recipe_categorie.recipe.id);
-                                    return (
-                                        <TouchableOpacity
-                                            key={recipe_categorie.recipe.id}
-                                            style={styles.verticalCard}
-                                            onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe_categorie.recipe.id })}
-                                            testID="recipe-card"
-                                        >
-                                            <Image
-                                                source={recipe_categorie.recipe.image_url ? { uri: recipe_categorie.recipe.image_url } : require('../assets/testRecipe.jpg')}
-                                                style={{ width: '100%', height: CARD_WIDTH, resizeMode: 'cover', borderRadius: 8}}
-                                            />
-                                            <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
-                                                {recipe_categorie.recipe.title}
-                                            </Text>
-                                            <TouchableOpacity
-                                                style={styles.cardIcon}
-                                                onPress={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleFavorite(recipe_categorie.recipe.id);
-                                                }}
-                                            >
-                                                <Ionicons
-                                                    name={isFavorite ? "heart" : "heart-outline"}
-                                                    size={moderateScale(28)}
-                                                    color={isFavorite ? "#ff4444" : "white"}
-                                                />
-                                            </TouchableOpacity>
-                                        </TouchableOpacity>
-                                    );
-                                })}
-                            </View>
+                            <VerticalRecipe
+                                recipes={Category.recipe_categories}
+                                favorites={favorites}
+                                onPress={(id) =>
+                                    navigation.navigate('RecipeDetail', { recipeId: id })
+                                }
+                                onToggleFavorite={toggleFavorite}
+                            />
                         ) : (
                             // Horizontal scroll for non-selected categories
                             <ScrollView horizontal={true} style={{ height: scale(134) }} contentContainerStyle={styles.cardrow}>
@@ -214,31 +188,17 @@ const styles = StyleSheet.create({
         paddingTop: scale(10),   // replaces mt-4
         gap: scale(6),
     },
-
     categoryTitle: {
         fontSize: moderateScale(24),
         fontWeight: 'bold',
     },
-
     cardrow: {
         paddingHorizontal: scale(10),
         gap: scale(10),
     },
-    verticalContainer: {
-        paddingHorizontal: scale(10),
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: scale(10),
-        paddingVertical: scale(10),
-    },
     card: {
         position: 'relative',
         textAlign: 'center',
-    },
-    verticalCard: {
-        position: 'relative',
-        width: CARD_WIDTH,
-        marginBottom: scale(10),
     },
     cardText: {
         position: 'absolute',
@@ -258,5 +218,4 @@ const styles = StyleSheet.create({
         padding: 0,
         color: 'white',
     }
-
 });

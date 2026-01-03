@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Header from '../components/Header';
 import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
+import VerticalRecipe from '../components/VerticalRecipe';
 
 const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function CollectionsScreen({ navigation }) {
@@ -88,6 +89,20 @@ export default function CollectionsScreen({ navigation }) {
     }
   };
 
+  const confirmRemoveFavorite = (recipeId, title) => {
+    Alert.alert(
+      'Remove from Collections',
+      `Remove "${title}" from your collections?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => removeFavorite(recipeId),
+        },
+      ]
+    );
+  };
   // Filter favorites by search query
   const filteredFavorites = favorites.filter(fav => {
     if (!fav.recipes) return false;
@@ -122,48 +137,16 @@ export default function CollectionsScreen({ navigation }) {
             </Text>
           </View>
         ) : (
-          <View style={styles.gridContainer}>
-            {filteredFavorites.map((favorite) => (
-              <TouchableOpacity
-                key={favorite.recipe_id}
-                style={styles.card}
-                onPress={() => navigation.navigate('RecipeDetail', { recipeId: favorite.recipe_id })}
-              >
-                <Image
-                  source={
-                    favorite.recipes?.image_url
-                      ? { uri: favorite.recipes.image_url }
-                      : require('../assets/testRecipe.jpg')
-                  }
-                  style={{ width: '100%', height: CARD_WIDTH, resizeMode: 'cover', borderRadius: 8 }}
-                />
-                <Text style={styles.cardText} numberOfLines={2} ellipsizeMode="tail">
-                  {favorite.recipes?.title || 'Untitled'}
-                </Text>
-                <TouchableOpacity
-                  style={styles.cardIcon}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    Alert.alert(
-                      'Remove from Collections',
-                      `Remove "${favorite.recipes?.title}" from your collections?`,
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        {
-                          text: 'Remove',
-                          style: 'destructive',
-                          onPress: () => removeFavorite(favorite.recipe_id)
-                        }
-                      ]
-                    );
-                  }}
-                >
-                  <Ionicons name="heart" size={moderateScale(28)} color="#ff4444" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
-
-          </View>
+          <VerticalRecipe
+            recipes={filteredFavorites}
+            favorites={new Set(filteredFavorites.map(f => f.recipe_id))}
+            onPress={(id) =>
+              navigation.navigate('RecipeDetail', { recipeId: id })
+            }
+            onToggleFavorite={(id, title) =>
+              confirmRemoveFavorite(id, title)
+            }
+          />
         )}
       </ScrollView>
 
@@ -172,35 +155,4 @@ export default function CollectionsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  gridContainer: {
-    paddingHorizontal: scale(10),
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: scale(10),
-  },
-  card: {
-    position: 'relative',
-    width: CARD_WIDTH,
-    marginBottom: scale(10),
-  },
-  cardText: {
-    position: 'absolute',
-    bottom: 10,
-    left: 4,
-    right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 5,
-    padding: 4,
-    color: 'white',
-  },
-  cardIcon: {
-    position: 'absolute',
-    top: 5,
-    right: 4,
-    borderColor: 'black',
-    padding: 0,
-    color: 'white',
-  }
-});
 
