@@ -19,6 +19,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import { supabase } from '../lib/supabase';
 import IngredientsList from '../components/IngredientsList';
+import RecipeHeader from '../components/DetailScreen/RecipeHeader';
+import  RecipeTab from '../components/DetailScreen/RecipeTab';
+import RecipeContent from '../components/DetailScreen/RecipeContent';
+import CommentContent from '../components/DetailScreen/CommentContent';
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipeId } = route.params;
@@ -339,81 +343,16 @@ export default function RecipeDetailScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       {/* Image + Header */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={recipe.image_url ? { uri: recipe.image_url } : require('../assets/testRecipe.jpg')}
-          style={styles.recipeImage}
-        />
-
-        {/* Header on top of image */}
-        <View style={styles.headerOverlay}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIcon}>
-            <Ionicons name="arrow-back" size={moderateScale(28)} color="#fff" />
-          </TouchableOpacity>
-
-          <View style={styles.headerRightIcons}>
-            {currentUser && recipe.user_id === currentUser.id && (
-              <TouchableOpacity onPress={deleteRecipe} style={styles.deleteIcon}>
-                <Ionicons name="trash-outline" size={moderateScale(28)} color="#fff" />
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteIcon}>
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={moderateScale(28)}
-                color={isFavorite ? "#ff4444" : "#fff"}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.authorContainer}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Profile', { userId: recipe.user?.id })}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={
-                recipe.user?.avatar_url
-                  ? { uri: recipe.user.avatar_url }
-                  : require('../assets/pfp.jpg')
-              }
-              style={styles.authorAvatar}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Profile', { userId: recipe.user?.id })}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.authorName}>
-              {recipe.user?.username}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-      </View>
-
-
+      <RecipeHeader navigation={navigation}
+        recipe={recipe}
+        currentUser={currentUser}
+        isFavorite={isFavorite}
+        onDelete={deleteRecipe}
+        onToggleFavorite={toggleFavorite}
+        styles={styles} />
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'recipe' && styles.activeTab]}
-          onPress={() => setActiveTab('recipe')}
-        >
-          <Text style={[styles.tabText, activeTab === 'recipe' && styles.activeTabText]}>
-            Recipe
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'comments' && styles.activeTab]}
-          onPress={() => setActiveTab('comments')}
-        >
-          <Text style={[styles.tabText, activeTab === 'comments' && styles.activeTabText]}>
-            {comments.length} Comments
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <RecipeTab activeTab={activeTab} setActiveTab={setActiveTab} comments={comments} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -425,79 +364,12 @@ export default function RecipeDetailScreen({ route, navigation }) {
           {activeTab === 'recipe' ? (
             <>
               {/* Title and Rating */}
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>{recipe.title}</Text>
-                <View style={styles.metaContainer}>
-                  <View style={styles.metaItem}>
-                    <Text style={styles.metaLabel}>Difficulty:</Text>
-                    {renderStars(recipe.difficulty)}
-                  </View>
-                  {recipe.prep_time && (
-                    <View style={styles.metaItem}>
-                      <Ionicons name="time-outline" size={moderateScale(18)} color="#666" />
-                      <Text style={styles.metaText}>{recipe.prep_time} min</Text>
-                    </View>
-                  )}
-                </View>
-                <IngredientsList ingredients={ingredients} />
-                <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: moderateScale(10) }}>Instructions</Text>
-                <Text style={styles.description}>{recipe.description}</Text>
-
-              </View>
+              <RecipeContent recipe={recipe} ingredients={ingredients} renderStars={renderStars} />
             </>
           ) : (
             <>
               {/* Comments Section */}
-              <View style={styles.commentsSection}>
-                {(() => {
-                  console.log('Rendering comments section. commentsLoading:', commentsLoading, 'comments.length:', comments.length);
-                  console.log('Comments state:', JSON.stringify(comments, null, 2));
-                  return null;
-                })()}
-                {commentsLoading ? (
-                  <ActivityIndicator size="small" color="#7CC57E" />
-                ) : comments.length === 0 ? (
-                  <Text style={styles.noCommentsText}>No comments yet. Be the first to comment!</Text>
-                ) : (
-                  comments.map((comment) => (
-                    <View key={comment.id} style={styles.commentItem}>
-                      <View style={styles.commentHeader}>
-                        {/* Avatar */}
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate('Profile', { userId: comment.user?.id })}
-                          style={styles.commentAvatar}
-                        >
-                          {comment.user?.avatar_url ? (
-                            <Image
-                              source={{ uri: comment.user.avatar_url }}
-                              style={styles.avatarImage}
-                            />
-                          ) : (
-                            <Ionicons name="person-circle" size={moderateScale(40)} color="#ccc" />
-                          )}
-                        </TouchableOpacity>
-
-                        {/* Username */}
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate('Profile', { userId: comment.user?.id })}
-                          style={styles.commentInfo}
-                        >
-                          <Text style={styles.commentUsername}>
-                            {comment.user?.username || 'Anonymous'}
-                          </Text>
-                          <Text style={styles.commentDate}>
-                            {new Date(comment.created_at).toLocaleDateString()}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-
-                      <Text style={styles.commentContent}>{comment.content}</Text>
-                    </View>
-                  ))
-                )}
-
-
-              </View>
+              <CommentContent navigation={navigation} comments={comments} commentsLoading={commentsLoading} />
             </>
           )}
         </ScrollView>
@@ -530,26 +402,6 @@ export default function RecipeDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  headerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: scale(16),
-    paddingTop: verticalScale(12), // SafeAreaView already handles status bar
-  },
-  headerRightIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deleteIcon: {
-    padding: scale(8),
-    marginRight: scale(4),
-  },
-
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -594,45 +446,6 @@ const styles = StyleSheet.create({
   favoriteIcon: {
     padding: scale(8),
   },
-  imageContainer: {
-    width: '100%',
-    height: verticalScale(330),
-    overflow: 'hidden', // 👈 IMPORTANT
-  },
-
-  recipeImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#DAFFDB',
-    borderTopRightRadius: moderateScale(15),
-    borderTopLeftRadius: moderateScale(15),
-    marginTop: -moderateScale(20),
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: verticalScale(12),
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: '#7CC57E',
-  },
-  tabText: {
-    fontSize: moderateScale(16),
-    color: '#666',
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#7CC57E',
-    fontWeight: '600',
-  },
   content: {
     flex: 1,
     backgroundColor: '#F3FFF4',
@@ -640,41 +453,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: verticalScale(20),
 
-  },
-  titleContainer: {
-    paddingHorizontal: scale(16),
-    paddingTop: verticalScale(16),
-    paddingBottom: verticalScale(12),
-  },
-  title: {
-    fontSize: moderateScale(28),
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: verticalScale(1),
-  },
-  description: {
-    fontSize: moderateScale(16),
-    color: '#666',
-    marginBottom: verticalScale(12),
-  },
-  metaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(20),
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(8),
-  },
-  metaLabel: {
-    fontSize: moderateScale(14),
-    color: '#666',
-    fontWeight: '500',
-  },
-  metaText: {
-    fontSize: moderateScale(14),
-    color: '#666',
   },
   starsContainer: {
     flexDirection: 'row',
@@ -708,57 +486,6 @@ const styles = StyleSheet.create({
     color: '#333',
     lineHeight: moderateScale(24),
   },
-  commentsSection: {
-    paddingHorizontal: scale(16),
-    paddingTop: verticalScale(16),
-  },
-  noCommentsText: {
-    fontSize: moderateScale(16),
-    color: '#999',
-    textAlign: 'center',
-    paddingVertical: verticalScale(40),
-  },
-  commentItem: {
-    marginBottom: verticalScale(16),
-    paddingBottom: verticalScale(16),
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  commentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(8),
-  },
-  commentAvatar: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    overflow: 'hidden',
-    marginRight: scale(12),
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  commentInfo: {
-    flex: 1,
-  },
-  commentUsername: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    color: '#333',
-  },
-  commentDate: {
-    fontSize: moderateScale(12),
-    color: '#999',
-    marginTop: verticalScale(2),
-  },
-  commentContent: {
-    fontSize: moderateScale(15),
-    color: '#333',
-    lineHeight: moderateScale(22),
-    marginLeft: moderateScale(52),
-  },
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -781,32 +508,5 @@ const styles = StyleSheet.create({
   sendButton: {
     padding: scale(8),
   },
-  authorContainer: {
-    position: 'absolute',
-    bottom: moderateScale(25),
-    left: scale(16),
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(10),
-    zIndex: 10,
-  },
-
-  authorAvatar: {
-    width: scale(55),
-    height: scale(55),
-    borderRadius: scale(64),
-    borderWidth: 1,
-    borderColor: '#fff',
-  },
-
-  authorName: {
-    color: '#fff',
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-
 });
 
