@@ -12,6 +12,8 @@ export default function VerticalRecipe({
     favorites = new Set(),
     onPress,
     onToggleFavorite,
+    onDeleteRecipe,
+    isOwnProfile = false,
 }) {
     return (
         <View style={styles.container}>
@@ -38,20 +40,38 @@ export default function VerticalRecipe({
                             {recipe.title}
                         </Text>
 
-                        {onToggleFavorite && (
+                        {isOwnProfile ? (
                             <TouchableOpacity
                                 style={styles.cardIcon}
                                 onPress={(e) => {
                                     e.stopPropagation();
-                                    onToggleFavorite(recipeId, recipe.title);
+                                    onDeleteRecipe?.(recipeId);
                                 }}
                             >
                                 <Ionicons
-                                    name={isFavorite ? 'heart' : 'heart-outline'}
-                                    size={moderateScale(28)}
-                                    color={isFavorite ? '#ff4444' : 'white'}
+                                    name="trash-outline"
+                                    size={moderateScale(26)}
+                                    color="white"
+                                    backgroundColor="rgba(255, 76, 76, 0.9)"
+                                    borderRadius={50}
                                 />
                             </TouchableOpacity>
+                        ) : (
+                            onToggleFavorite && (
+                                <TouchableOpacity
+                                    style={styles.cardIcon}
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        onToggleFavorite(recipeId, recipe.title);
+                                    }}
+                                >
+                                    <Ionicons
+                                        name={isFavorite ? 'heart' : 'heart-outline'}
+                                        size={moderateScale(28)}
+                                        color={isFavorite ? '#ff4444' : 'white'}
+                                    />
+                                </TouchableOpacity>
+                            )
                         )}
                     </TouchableOpacity>
                 );

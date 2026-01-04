@@ -15,6 +15,7 @@ import Navbar from '../components/Navbar';
 import { supabase } from '../lib/supabase';
 import { scale, moderateScale } from '../utils/scaling';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import VerticalRecipe from '../components/VerticalRecipe';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -26,6 +27,7 @@ export default function ProfileScreen() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [favorites, setFavorites] = useState([]);
 
   const userId = route.params?.userId;
 
@@ -81,7 +83,12 @@ export default function ProfileScreen() {
         .order('created_at', { ascending: false });
       if (!recipesError) {
         console.log('ProfileScreen: Loaded', recipesData?.length || 0, 'recipes');
-        setRecipes(recipesData || []);
+        const normalized = recipesData.map(r => ({
+          recipe_id: r.id,
+          recipes: r,
+        }));
+
+        setRecipes(normalized);
       }
 
       // Followers / Following counts
@@ -150,6 +157,72 @@ export default function ProfileScreen() {
       alert('Failed to update follow status');
     }
   };
+
+  const loadFavorites = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('recipe_id')
+        .eq('user_id', user.id);
+
+      if (!error && data) {
+        setFavorites(new Set(data.map(fav => fav.recipe_id)));
+      }
+    } catch (err) {
+      console.error('Error loading favorites:', err);
+    }
+  };
+  useEffect(() => {
+    loadFavorites();
+  }, []);
+  const toggleFavorite = async (recipeId) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        Alert.alert('Login Required', 'Please login to save favorites');
+        return;
+      }
+
+      const isFavorite = favorites.has(recipeId);
+
+      if (isFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('recipe_id', recipeId);
+
+        if (error) {
+          Alert.alert('Error', error.message);
+        } else {
+          const newFavorites = new Set(favorites);
+          newFavorites.delete(recipeId);
+          setFavorites(newFavorites);
+        }
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, recipe_id: recipeId });
+
+        if (error) {
+          Alert.alert('Error', error.message);
+        } else {
+          const newFavorites = new Set(favorites);
+          newFavorites.add(recipeId);
+          setFavorites(newFavorites);
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
+  };
+
 
   const deleteRecipe = async (recipeId) => {
     Alert.alert(
@@ -280,41 +353,14 @@ export default function ProfileScreen() {
         </View>
 
         {/* Recipe Grid */}
-        <View style={styles.grid}>
-          {recipes.map((recipe) => (
-            <TouchableOpacity
-              key={recipe.id}
-              style={styles.recipeCard}
-              onPress={() => navigation.navigate('RecipeDetail', { recipeId: recipe.id })}
-            >
-              <Image
-                source={
-                  recipe.image_url
-                    ? { uri: recipe.image_url }
-                    : require('../assets/pfp.jpg')
-                }
-                style={styles.recipeImage}
-              />
-              {isOwnProfile && (
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    deleteRecipe(recipe.id);
-                  }}
-                >
-                  <Ionicons name="trash" size={18} color="#fff" />
-                </TouchableOpacity>
-              )}
-              <Ionicons
-                name="heart"
-                size={18}
-                color="#444"
-                style={styles.heart}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
+        <VerticalRecipe
+          recipes={recipes}
+          favorites={favorites}
+          onPress={(recipeId) => navigation.navigate('RecipeDetail', { recipeId })}
+          onToggleFavorite={toggleFavorite}
+          isOwnProfile={isOwnProfile}
+          onDeleteRecipe={deleteRecipe}
+        />
       </ScrollView>
 
       <Navbar />
@@ -343,19 +389,5 @@ const styles = StyleSheet.create({
   statItem: { alignItems: 'center' },
   statValue: { fontWeight: '700', fontSize: 16 },
   statLabel: { fontSize: 11, color: '#666' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: scale(8) },
-  recipeCard: { width: '31%', aspectRatio: 1, margin: '1%', borderRadius: 12, overflow: 'hidden', backgroundColor: '#ddd' },
-  recipeImage: { width: '100%', height: '100%', borderRadius: 12 },
-  heart: { position: 'absolute', top: 8, right: 8 },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 76, 76, 0.9)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  
 });
