@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
         borderColor: "#000000ff",
         borderWidth: 1,
         borderRadius: 8,
-        padding: 15,
+        paddingLeft: scale(10),
         height: verticalScale(50),
         marginBottom: scale(10),
 
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
         borderColor: "#000000ff",
         borderWidth: 1,
         borderRadius: 8,
-        padding: 15,
+        paddingLeft: scale(10),
         height: verticalScale(550),
     },
     NextBtn: {
