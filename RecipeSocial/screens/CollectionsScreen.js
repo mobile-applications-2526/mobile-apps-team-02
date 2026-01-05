@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback  } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,86 +6,42 @@ import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 import Header from '../components/Header';
 import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
-import { supabase } from '../lib/supabase';
 import VerticalRecipe from '../components/VerticalRecipe';
+import { fetchFavorites, deleteFavorite } from '../services/favorites.service';
 
 const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function CollectionsScreen({ navigation }) {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const getFavorites = async () => {
-    console.log('CollectionsScreen: Loading favorites... (refreshKey:', refreshKey, ')');
-    setLoading(true);
+  const getFavorites = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        Alert.alert('Error', 'Please login to view your collections');
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('favorites')
-        .select(`
-          recipe_id,
-          recipes (
-            id,
-            title,
-            image_url
-          )
-        `)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error fetching favorites:', error);
-        Alert.alert('Error', error.message);
-      } else {
-        console.log('CollectionsScreen: Loaded', data?.length || 0, 'favorites');
-        setFavorites(data || []);
-      }
-    } catch (err) {
-      console.error('Error:', err);
+      setLoading(true);
+      const data = await fetchFavorites();
+      setFavorites(data);
+    } catch (e) {
+      console.error('Error fetching favorites:', e);
+      Alert.alert("Error", e.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, []);
 
-  // Load and refresh when screen comes into focus
   useFocusEffect(
-    React.useCallback(() => {
-      console.log('CollectionsScreen: useFocusEffect triggered');
-      setRefreshKey(prev => prev + 1);
+    useCallback(() => {
       getFavorites();
-    }, [])
+    }, [getFavorites])
   );
 
-  const removeFavorite = async (recipeId) => {
+
+   const removeFavorite = async (recipeId) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        Alert.alert('Error', 'Please login to manage collections');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('recipe_id', recipeId);
-
-      if (error) {
-        Alert.alert('Error', error.message);
-      } else {
-        // Update local state
-        setFavorites(favorites.filter(fav => fav.recipe_id !== recipeId));
-        Alert.alert('Success', 'Removed from collections');
-      }
-    } catch (err) {
-      console.error('Error removing favorite:', err);
+      await deleteFavorite(recipeId);
+      setFavorites(prev => prev.filter(f => f.recipe_id !== recipeId));
+      Alert.alert('Success', 'Removed from collections');
+    } catch (e) {
+      Alert.alert("Error", e.message);
     }
   };
 
@@ -121,7 +77,7 @@ export default function CollectionsScreen({ navigation }) {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(100), paddingTop: verticalScale(10) }} key={refreshKey}>
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(100), paddingTop: verticalScale(10) }}>
         {loading ? (
           <View style={{ padding: scale(20), alignItems: 'center' }}>
             <Text style={{ fontSize: moderateScale(16), color: '#666' }}>Loading...</Text>
@@ -154,5 +110,3 @@ export default function CollectionsScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-

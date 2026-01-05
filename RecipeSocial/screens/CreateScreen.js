@@ -5,35 +5,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
 import Ingredients from '../components/create/Ingredients';
 import TextRecept from '../components/create/TextRecept';
-import { supabase } from '../lib/supabase';
 import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
 import Details from '../components/create/Details';
+import { createRecipe } from '../services/recipes.service';
+
 export default function CreateScreen({ navigation }) {
     const [image, setImage] = useState(null);
     const [step, setStep] = useState(0);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [ingredients, setIngredients] = useState([]);
-
     const [categories, setCategories] = useState([]);
     const [selected, setSelected] = useState([]);
     const [difficulty, setDifficulty] = useState('');
     const [prepTime, setPrepTime] = useState('');
 
     const pickImage = async () => {
-        // No permissions request is necessary for launching the image library.
-        // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
-        // and `videoExportPreset` is `'Passthrough'` (the default), ideally before launching the picker
-        // so the app users aren't surprised by a system dialog after picking a video.
-        // See "Invoke permissions for videos" sub section for more details.
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         if (!permissionResult.granted) {
             Alert.alert('Permission required', 'Permission to access the media library is required.');
             return;
         }
-
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -51,83 +44,24 @@ export default function CreateScreen({ navigation }) {
             setImage(result.assets[0].uri);
         }
     };
-
-
     const handleSubmit = async () => {
         try {
-            const {
-                data: { user },
-                error: userError,
-            } = await supabase.auth.getUser();
-
-            if (userError || !user) {
-                throw new Error("User not authenticated");
-            }
-
-            let imageUrl = image;
-
-            // Upload only if it's a local file
-            if (image && image.startsWith("file://")) {
-                imageUrl = await uploadRecipeImage(image);
-            }
-
-            const { data: recipe, error: recipeError } = await supabase
-                .from('recipes')
-                .insert({
-                    user_id: user.id,
-                    title,
-                    description,
-                    difficulty,
-                    prep_time: prepTime,
-                    image_url: imageUrl,
-                })
-                .select()
-                .single();
-            if (recipeError) throw recipeError;
-            const categoryRows = selected.map((catId) => ({
-                recipe_id: recipe.id,
-                category_id: catId,
-            }));
-            const { error: categoryError } = await supabase
-                .from("recipe_categories")
-                .insert(categoryRows);
-            if (categoryError) throw categoryError;
-            const ingredientRows = ingredients.map((i) => ({
-                recipe_id: recipe.id,
-                ingredient: i.ingredient,
-                quantity: i.size,
-            }));
-            const { error: ingredientError } = await supabase
-                .from("recipe_ingredients")
-                .insert(ingredientRows);
-
-            if (ingredientError) throw ingredientError;
-            Alert.alert("Success", "Recipe saved!");
-            navigation.navigate("Home");
+            await createRecipe({
+                title,
+                description,
+                difficulty,
+                prepTime,
+                image,
+                categories: selected,
+                ingredients,
+            });
+            Alert.alert('Success', 'Recipe saved!');
+            navigation.navigate('Home');
         } catch (err) {
             console.error(err);
-            Alert.alert("Error", "Could not save recipe");
+            Alert.alert('Error', err.message || 'Could not save recipe');
         }
     };
-
-    const uploadRecipeImage = async (uri) => {
-        const fileExt = uri.split('.').pop() || 'jpg';
-        const filePath = `${uuidv4()}.${fileExt}`;
-
-        const response = await fetch(uri);
-        const arrayBuffer = await response.arrayBuffer();
-
-        const { error } = await supabase.storage
-            .from('recipe-images')
-            .upload(filePath, arrayBuffer, { upsert: false, contentType: 'image/*' });
-
-        if (error) throw error;
-
-        const { data } = supabase.storage.from('recipe-images').getPublicUrl(filePath);
-        return data.publicUrl;
-    };
-
-
     useEffect(() => {
         const isE2E =
             typeof window !== 'undefined' &&
@@ -140,7 +74,6 @@ export default function CreateScreen({ navigation }) {
             pickImage();
         }
     }, []);
-
     return (
         <SafeAreaView className="flex-1 bg-white">
             <View style={styles.container}>
@@ -160,13 +93,11 @@ export default function CreateScreen({ navigation }) {
             </View>
             <Navbar />
         </SafeAreaView>
-
     );
 }
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
     },
     image: {
         width: 200,
