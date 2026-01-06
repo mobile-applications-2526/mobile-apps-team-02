@@ -105,15 +105,44 @@ export default function RecipeDetailScreen({ route, navigation }) {
   };
 
   const handleToggleFavorite = async () => {
-    try {
-      const isFav = await toggleFavorite(recipeId);
-      setIsFavorite(isFav);
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      if (error.message === 'Not authenticated') {
-        Alert.alert('Login Required', 'Please login to save favorites');
-      } else {
-        Alert.alert('Error', 'Failed to update favorite');
+    const wasInFavorites = isFavorite;
+
+    if (wasInFavorites) {
+      // Show confirmation before removing
+      Alert.alert(
+        'Remove from Collections',
+        `Remove "${recipe?.title}" from your collections?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const isFav = await toggleFavorite(recipeId);
+                setIsFavorite(isFav);
+                Alert.alert('Success', 'Removed from collections');
+              } catch (error) {
+                console.error('Error removing favorite:', error);
+                Alert.alert('Error', 'Failed to update favorite');
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      // Add to favorites without confirmation
+      try {
+        const isFav = await toggleFavorite(recipeId);
+        setIsFavorite(isFav);
+        Alert.alert('Success', 'Added to collections');
+      } catch (error) {
+        console.error('Error adding favorite:', error);
+        if (error.message === 'Not authenticated') {
+          Alert.alert('Login Required', 'Please login to save favorites');
+        } else {
+          Alert.alert('Error', 'Failed to update favorite');
+        }
       }
     }
   };

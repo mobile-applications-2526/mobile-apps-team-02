@@ -133,22 +133,49 @@ export default function ProfileScreen() {
   useEffect(() => {
     loadUserFavorites();
   }, []);
-  const handleToggleFavorite = async (recipeId) => {
-    try {
-      const isFavorite = await toggleFavorite(recipeId);
-      const newFavorites = new Set(favorites);
-      if (isFavorite) {
+  const handleToggleFavorite = async (recipeId, recipeTitle) => {
+    const wasInFavorites = favorites.has(recipeId);
+
+    if (wasInFavorites) {
+      // Show confirmation before removing
+      Alert.alert(
+        'Remove from Collections',
+        `Remove "${recipeTitle}" from your collections?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await toggleFavorite(recipeId);
+                const newFavorites = new Set(favorites);
+                newFavorites.delete(recipeId);
+                setFavorites(newFavorites);
+                Alert.alert('Success', 'Removed from collections');
+              } catch (err) {
+                console.error('Error removing favorite:', err);
+                Alert.alert('Error', err.message);
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      // Add to favorites without confirmation
+      try {
+        await toggleFavorite(recipeId);
+        const newFavorites = new Set(favorites);
         newFavorites.add(recipeId);
-      } else {
-        newFavorites.delete(recipeId);
-      }
-      setFavorites(newFavorites);
-    } catch (err) {
-      console.error('Error toggling favorite:', err);
-      if (err.message === 'Not authenticated') {
-        Alert.alert('Login Required', 'Please login to save favorites');
-      } else {
-        Alert.alert('Error', err.message);
+        setFavorites(newFavorites);
+        Alert.alert('Success', 'Added to collections');
+      } catch (err) {
+        console.error('Error adding favorite:', err);
+        if (err.message === 'Not authenticated') {
+          Alert.alert('Login Required', 'Please login to save favorites');
+        } else {
+          Alert.alert('Error', err.message);
+        }
       }
     }
   };
@@ -277,7 +304,7 @@ export default function ProfileScreen() {
           recipes={recipes}
           favorites={favorites}
           onPress={(recipeId) => navigation.navigate('RecipeDetail', { recipeId })}
-          onToggleFavorite={handleToggleFavorite}
+          onToggleFavorite={(recipeId, recipeTitle) => handleToggleFavorite(recipeId, recipeTitle)}
           isOwnProfile={isOwnProfile}
           onDeleteRecipe={handleDeleteRecipe}
         />

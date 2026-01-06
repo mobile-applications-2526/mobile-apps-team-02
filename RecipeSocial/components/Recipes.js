@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
 import { loadFavorites, toggleFavorite } from '../services/favorites.service';
 import VerticalRecipe from './VerticalRecipe';
@@ -8,36 +9,66 @@ import VerticalRecipe from './VerticalRecipe';
 const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
 export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuery = '', selectedCategory = null, navigation, onCategorySelect = () => { } }) {
     const [favorites, setFavorites] = useState(new Set());
-    // Load user's favorites
-    useEffect(() => {
-        loadUserFavorites();
-    }, []);
 
-    const loadUserFavorites = async () => {
+    const loadUserFavorites = useCallback(async () => {
         try {
             const favSet = await loadFavorites();
             setFavorites(favSet);
         } catch (err) {
             console.error('Error loading favorites:', err);
         }
-    };
+    }, []);
 
-    const handleToggleFavorite = async (recipeId) => {
-        try {
-            const isFavorite = await toggleFavorite(recipeId);
-            const newFavorites = new Set(favorites);
-            if (isFavorite) {
+    // Reload favorites when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            loadUserFavorites();
+        }, [loadUserFavorites])
+    );
+
+    const handleToggleFavorite = async (recipeId, recipeTitle) => {
+        const wasInFavorites = favorites.has(recipeId);
+
+        if (wasInFavorites) {
+            // Show confirmation before removing
+            Alert.alert(
+                'Remove from Collections',
+                `Remove "${recipeTitle}" from your collections?`,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Remove',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                await toggleFavorite(recipeId);
+                                const newFavorites = new Set(favorites);
+                                newFavorites.delete(recipeId);
+                                setFavorites(newFavorites);
+                                Alert.alert('Success', 'Removed from collections');
+                            } catch (err) {
+                                console.error('Error removing favorite:', err);
+                                Alert.alert('Error', err.message);
+                            }
+                        },
+                    },
+                ]
+            );
+        } else {
+            // Add to favorites without confirmation
+            try {
+                await toggleFavorite(recipeId);
+                const newFavorites = new Set(favorites);
                 newFavorites.add(recipeId);
-            } else {
-                newFavorites.delete(recipeId);
-            }
-            setFavorites(newFavorites);
-        } catch (err) {
-            console.error('Error toggling favorite:', err);
-            if (err.message === 'Not authenticated') {
-                Alert.alert('Login Required', 'Please login to save favorites');
-            } else {
-                Alert.alert('Error', err.message);
+                setFavorites(newFavorites);
+                Alert.alert('Success', 'Added to collections');
+            } catch (err) {
+                console.error('Error adding favorite:', err);
+                if (err.message === 'Not authenticated') {
+                    Alert.alert('Login Required', 'Please login to save favorites');
+                } else {
+                    Alert.alert('Error', err.message);
+                }
             }
         }
     };
@@ -94,7 +125,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                 onPress={(id) =>
                                     navigation.navigate('RecipeDetail', { recipeId: id })
                                 }
-                                onToggleFavorite={handleToggleFavorite}
+                                onToggleFavorite={(id, title) => handleToggleFavorite(id, title)}
                             />
                         ) : (
                             // Horizontal scroll for non-selected categories
@@ -119,7 +150,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                                 style={styles.cardIcon}
                                                 onPress={(e) => {
                                                     e.stopPropagation();
-                                                    handleToggleFavorite(recipe_categorie.recipe.id);
+                                                    handleToggleFavorite(recipe_categorie.recipe.id, recipe_categorie.recipe.title);
                                                 }}
                                             >
                                                 <Ionicons
