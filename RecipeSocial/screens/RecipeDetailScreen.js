@@ -16,6 +16,7 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
 import IngredientsList from '../components/IngredientsList';
 import RecipeHeader from '../components/DetailScreen/RecipeHeader';
@@ -45,6 +46,13 @@ export default function RecipeDetailScreen({ route, navigation }) {
     checkFavoriteStatus();
     getCurrentUser();
   }, [recipeId]);
+
+  // Refresh favorite status when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      checkFavoriteStatus();
+    }, [recipeId])
+  );
 
   const getCurrentUser = async () => {
     const user = await authService.getCurrentUser();
