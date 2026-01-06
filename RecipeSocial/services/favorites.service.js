@@ -52,12 +52,17 @@ export async function checkIfFavorite(recipeId) {
 
   const { data, error } = await supabase
     .from("favorites")
-    .select("id")
+    .select("recipe_id")
     .eq("user_id", user.id)
     .eq("recipe_id", recipeId)
-    .single();
+    .maybeSingle();
 
-  return !error && data !== null;
+  if (error) {
+    console.error('Error checking favorite:', error);
+    return false;
+  }
+
+  return data !== null;
 }
 
 export async function toggleFavorite(recipeId) {
@@ -67,9 +72,20 @@ export async function toggleFavorite(recipeId) {
     throw new Error("Not authenticated");
   }
 
-  const isFavorite = await checkIfFavorite(recipeId);
+  // First, check if the favorite exists
+  const { data: existingFavorite, error: checkError } = await supabase
+    .from("favorites")
+    .select("recipe_id")
+    .eq("user_id", user.id)
+    .eq("recipe_id", recipeId)
+    .maybeSingle();
 
-  if (isFavorite) {
+  if (checkError) {
+    console.error('Error checking favorite:', checkError);
+    throw checkError;
+  }
+
+  if (existingFavorite) {
     // Remove from favorites
     const { error } = await supabase
       .from("favorites")
