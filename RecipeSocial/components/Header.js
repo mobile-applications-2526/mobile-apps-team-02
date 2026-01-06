@@ -1,34 +1,26 @@
 import { View, Image, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale, scale, verticalScale } from "../utils/scaling";
-import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
+import { authService } from '../services/auth.service';
+import { userService } from '../services/user.service';
 
 
 export default function Header({ searchQuery = '', setSearchQuery = () => { }, navigation }) {
     const [profile, setProfile] = useState(null);
 
     const getUserProfile = async () => {
-        const {
-            data: { user },
-            error: userError,
-        } = await supabase.auth.getUser();
+        try {
+            const user = await authService.getCurrentUser();
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
 
-        if (userError || !user) {
-            throw new Error("User not authenticated");
+            const data = await userService.getProfile(user.id);
+            setProfile(data);
+        } catch (error) {
+            console.error('Error loading user profile:', error);
         }
-        const { data, error } = await supabase
-            .from('userinfo')
-            .select('username, avatar_url')
-            .eq('id', user.id)
-            .single();
-
-        if (error) {
-            console.error(error);
-            return;
-        }
-
-        setProfile(data);
     }
     useEffect(() => {
         getUserProfile();

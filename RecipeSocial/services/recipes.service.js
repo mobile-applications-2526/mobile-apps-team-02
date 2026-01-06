@@ -82,3 +82,58 @@ export async function createRecipe({
 
   return recipe;
 }
+
+export async function getUserRecipes(userId) {
+  const { data, error } = await supabase
+    .from('recipes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Normalize the response to match the expected format
+  return data.map(r => ({
+    recipe_id: r.id,
+    recipes: r,
+  }));
+}
+
+export async function deleteRecipe(recipeId, userId) {
+  const { error } = await supabase
+    .from('recipes')
+    .delete()
+    .eq('id', recipeId)
+    .eq('user_id', userId);
+
+  if (error) throw error;
+}
+
+export async function getRecipeDetails(recipeId) {
+  const { data, error } = await supabase
+    .from('recipes')
+    .select(`
+      *,
+      user:userinfo!recipes_user_id_fkey (
+        id,
+        username,
+        avatar_url
+      )
+    `)
+    .eq('id', recipeId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRecipeIngredients(recipeId) {
+  const { data, error } = await supabase
+    .from('recipe_ingredients')
+    .select('ingredient, quantity')
+    .eq('recipe_id', recipeId);
+
+  if (error) throw error;
+  return data || [];
+}
+

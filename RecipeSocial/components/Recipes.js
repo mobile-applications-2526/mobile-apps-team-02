@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { scale, verticalScale, moderateScale, screenWidth } from '../utils/scaling';
-import { supabase } from '../lib/supabase';
+import { loadFavorites, toggleFavorite } from '../services/favorites.service';
 import VerticalRecipe from './VerticalRecipe';
 
 const CARD_WIDTH = (screenWidth() - scale(10) * 2 - scale(10)) / 2;
@@ -10,69 +10,35 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
     const [favorites, setFavorites] = useState(new Set());
     // Load user's favorites
     useEffect(() => {
-        loadFavorites();
+        loadUserFavorites();
     }, []);
 
-    const loadFavorites = async () => {
+    const loadUserFavorites = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data, error } = await supabase
-                .from('favorites')
-                .select('recipe_id')
-                .eq('user_id', user.id);
-
-            if (!error && data) {
-                setFavorites(new Set(data.map(fav => fav.recipe_id)));
-            }
+            const favSet = await loadFavorites();
+            setFavorites(favSet);
         } catch (err) {
             console.error('Error loading favorites:', err);
         }
     };
 
-    const toggleFavorite = async (recipeId) => {
+    const handleToggleFavorite = async (recipeId) => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                Alert.alert('Login Required', 'Please login to save favorites');
-                return;
-            }
-
-            const isFavorite = favorites.has(recipeId);
-
+            const isFavorite = await toggleFavorite(recipeId);
+            const newFavorites = new Set(favorites);
             if (isFavorite) {
-                // Remove from favorites
-                const { error } = await supabase
-                    .from('favorites')
-                    .delete()
-                    .eq('user_id', user.id)
-                    .eq('recipe_id', recipeId);
-
-                if (error) {
-                    Alert.alert('Error', error.message);
-                } else {
-                    const newFavorites = new Set(favorites);
-                    newFavorites.delete(recipeId);
-                    setFavorites(newFavorites);
-                }
+                newFavorites.add(recipeId);
             } else {
-                // Add to favorites
-                const { error } = await supabase
-                    .from('favorites')
-                    .insert({ user_id: user.id, recipe_id: recipeId });
-
-                if (error) {
-                    Alert.alert('Error', error.message);
-                } else {
-                    const newFavorites = new Set(favorites);
-                    newFavorites.add(recipeId);
-                    setFavorites(newFavorites);
-                }
+                newFavorites.delete(recipeId);
             }
+            setFavorites(newFavorites);
         } catch (err) {
             console.error('Error toggling favorite:', err);
+            if (err.message === 'Not authenticated') {
+                Alert.alert('Login Required', 'Please login to save favorites');
+            } else {
+                Alert.alert('Error', err.message);
+            }
         }
     };
 
@@ -128,7 +94,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                 onPress={(id) =>
                                     navigation.navigate('RecipeDetail', { recipeId: id })
                                 }
-                                onToggleFavorite={toggleFavorite}
+                                onToggleFavorite={handleToggleFavorite}
                             />
                         ) : (
                             // Horizontal scroll for non-selected categories
@@ -153,7 +119,7 @@ export default function Recipes({ CategoriesAndRecipes = [], loading, searchQuer
                                                 style={styles.cardIcon}
                                                 onPress={(e) => {
                                                     e.stopPropagation();
-                                                    toggleFavorite(recipe_categorie.recipe.id);
+                                                    handleToggleFavorite(recipe_categorie.recipe.id);
                                                 }}
                                             >
                                                 <Ionicons

@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
-import { supabase } from '../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
+import { authService } from '../services/auth.service';
 import AuthHeader from '../components/AuthHeader';
+import FormInput from '../components/FormInput';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const inputWidth = scale(329);
-  const inputHeight = verticalScale(55);
   const containerHeight = moderateScale(468);
   const verticalSpacing = verticalScale(20);
 
@@ -22,17 +20,12 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      Alert.alert('Login Failed', error.message);
-    } else {
+    try {
+      await authService.signIn(email, password);
       Alert.alert('Success', 'Logged in successfully!');
-      // Navigate to home or main screen
       navigation.navigate('Home');
+    } catch (error) {
+      Alert.alert('Login Failed', error.message);
     }
   };
 
@@ -54,38 +47,25 @@ export default function LoginScreen({ navigation }) {
           },
         ]}
       >
-        <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Email</Text>
-          <TextInput
-            className="border border-gray-400 rounded-lg p-3"
-            style={{ height: inputHeight }}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholder="Enter your email"
-            testID="login-email-input"
-            nativeID="login-email-input"
-            accessibilityLabel="login-email-input"
-          />
-        </View>
+        <FormInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          placeholder="Enter your email"
+          testID="login-email-input"
+        />
 
-        <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Password</Text>
-          <TextInput
-            className="border border-gray-400 rounded-lg p-3"
-            style={{ height: inputHeight }}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="Enter your password"
-            testID="login-password-input"
-            nativeID="login-password-input"
-            accessibilityLabel="login-password-input"
-          />
-        </View>
+        <FormInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholder="Enter your password"
+          testID="login-password-input"
+        />
 
-        <View style={{ width: inputWidth, alignSelf: 'center' }}>
+        <View style={{ width: scale(329), alignSelf: 'center' }}>
           <Text className="self-end mb-4" style={styles.text}>Forgot Password?</Text>
           <TouchableOpacity
             className="bg-gray-300 rounded-lg justify-center items-center"

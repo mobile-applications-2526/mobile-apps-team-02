@@ -1,26 +1,9 @@
 import "./global.css";
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from './lib/supabase';
-
-import StartScreen from './screens/StartScreen';
-import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
-import HomeScreen from './screens/HomeScreen';
-import CollectionsScreen from './screens/CollectionsScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import CreateScreen from './screens/CreateScreen';
-import EditProfileScreen from './screens/EditProfileScreen';
-import RecipeDetailScreen from './screens/RecipeDetailScreen';
-import FollowersScreen from './screens/FollowersScreen';
-import FollowingScreen from './screens/FollowingScreen';
-
-
-const Stack = createNativeStackNavigator();
+import LoadingScreen from './components/LoadingScreen';
+import AppNavigator from './navigation/AppNavigator';
+import { authService } from './services/auth.service';
 
 export default function App() {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -28,14 +11,10 @@ export default function App() {
 
   React.useEffect(() => {
     // Check for existing session on app startup
-    const checkSession = async () => {
+    const initializeApp = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setInitialRoute('Home');
-        } else {
-          setInitialRoute('Start');
-        }
+        const session = await authService.checkSession();
+        setInitialRoute(session ? 'Home' : 'Start');
       } catch (error) {
         console.error('Error checking session:', error);
         setInitialRoute('Start');
@@ -44,10 +23,10 @@ export default function App() {
       }
     };
 
-    checkSession();
+    initializeApp();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const subscription = authService.setupAuthListener((_event, session) => {
       if (_event === 'SIGNED_OUT') {
         setInitialRoute('Start');
       }
@@ -57,44 +36,13 @@ export default function App() {
   }, []);
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7CC57E" />
-        <Text style={{ marginTop: 10, color: '#666' }}>Loading...</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Start" component={StartScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Collections" component={CollectionsScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="Create" component={CreateScreen}/>
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-          <Stack.Screen name="Followers" component={FollowersScreen} />
-          <Stack.Screen name="Following" component={FollowingScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-   );
+    <NavigationContainer>
+      <AppNavigator initialRoute={initialRoute} />
+    </NavigationContainer>
+  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

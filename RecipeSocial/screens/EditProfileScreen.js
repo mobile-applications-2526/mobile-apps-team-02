@@ -11,10 +11,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { supabase } from '../lib/supabase';
+import { authService } from '../services/auth.service';
+import { userService } from '../services/user.service';
 import { scale, moderateScale } from '../utils/scaling';
-import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function EditProfileScreen({ navigation }) {
@@ -31,27 +30,24 @@ export default function EditProfileScreen({ navigation }) {
   }, []);
 
   const loadProfile = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
 
-    if (!user) return;
+      setEmail(user.email);
 
-    setEmail(user.email);
-
-    const { data } = await supabase
-      .from('userinfo')
-      .select('username, avatar_url, bio')
-      .eq('id', user.id)
-      .single();
-
-    if (data) {
-      setUsername(data.username);
-      setAvatar(data.avatar_url);
-      setBio(data.bio || '');
+      const profile = await userService.getProfile(user.id);
+      if (profile) {
+        setUsername(profile.username);
+        setAvatar(profile.avatar_url);
+        setBio(profile.bio || '');
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      Alert.alert('Error', 'Failed to load profile');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const pickImage = async () => {
@@ -74,67 +70,48 @@ export default function EditProfileScreen({ navigation }) {
     }
   };
 
-  const uploadAvatar = async (uri, userId) => {
-    const fileExt = uri.split('.').pop() || 'jpg';
-    const filePath = `${uuidv4()}.${fileExt}`;
-
-    const response = await fetch(uri);
-    const arrayBuffer = await response.arrayBuffer();
-
-    const { error } = await supabase.storage
-      .from('profile-images')
-      .upload(filePath, arrayBuffer, { upsert: false, contentType: 'image/*' });
-
-    if (error) throw error;
-
-    const { data } = supabase.storage.from('profile-images').getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
   const saveChanges = async () => {
     setSaving(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const user = await authService.getCurrentUser();
+      if (!user) return;
 
-    if (!user) return;
+      let avatarUrl = avatar;
 
-    let avatarUrl = avatar;
-
-    if (avatar && avatar.startsWith('file://')) {
-      try {
-        avatarUrl = await uploadAvatar(avatar, user.id);
-      } catch (error) {
-        Alert.alert('Upload Error', error.message);
-        setSaving(false);
-        return;
+      if (avatar && avatar.startsWith('file://')) {
+        try {
+          avatarUrl = await userService.uploadAvatar(avatar, user.id);
+        } catch (error) {
+          Alert.alert('Upload Error', error.message);
+          setSaving(false);
+          return;
+        }
       }
-    }
 
-    const { error } = await supabase
-      .from('userinfo')
-      .update({ username, avatar_url: avatarUrl, bio })
-      .eq('id', user.id);
+      await userService.updateProfile(user.id, {
+        username,
+        avatar_url: avatarUrl,
+        bio
+      });
 
-    if (error) {
+      if (email !== user.email) {
+        try {
+          await authService.updateEmail(email);
+        } catch (emailError) {
+          Alert.alert('Email Update Failed', emailError.message);
+          setSaving(false);
+          return;
+        }
+      }
+
+      Alert.alert('Success', 'Profile updated');
+      navigation.navigate('Profile', { newAvatar: avatarUrl });
+    } catch (error) {
       Alert.alert('Error', error.message);
+    } finally {
       setSaving(false);
-      return;
     }
-
-    if (email !== user.email) {
-      const { error: emailError } = await supabase.auth.updateUser({ email });
-      if (emailError) {
-        Alert.alert('Email Update Failed', emailError.message);
-        setSaving(false);
-        return;
-      }
-    }
-
-    Alert.alert('Success', 'Profile updated');
-    navigation.navigate('Profile', { newAvatar: avatarUrl });
-    setSaving(false);
   };
 
   if (loading) {

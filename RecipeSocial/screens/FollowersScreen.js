@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase } from '../lib/supabase';
+import { userService } from '../services/user.service';
 import { scale, moderateScale } from '../utils/scaling';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import UserListItem from '../components/UserListItem';
+import EmptyState from '../components/EmptyState';
 
 export default function FollowersScreen() {
   const navigation = useNavigation();
@@ -28,14 +29,7 @@ export default function FollowersScreen() {
   const fetchFollowers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('followers')
-        .select('follower_id, userinfo!followers_follower_id_fkey(*)')
-        .eq('following_id', userId);
-
-      if (error) throw error;
-
-      const followersList = data.map(item => item.userinfo);
+      const followersList = await userService.getFollowers(userId);
       setFollowers(followersList);
     } catch (error) {
       console.error('Error fetching followers:', error);
@@ -43,27 +37,6 @@ export default function FollowersScreen() {
       setLoading(false);
     }
   };
-
-  const renderFollower = ({ item }) => (
-    <TouchableOpacity
-      style={styles.userCard}
-      onPress={() => navigation.navigate('Profile', { userId: item.id })}
-    >
-      <Image
-        source={
-          item.avatar_url
-            ? { uri: item.avatar_url }
-            : require('../assets/pfp.jpg')
-        }
-        style={styles.avatar}
-      />
-      <View style={styles.userInfo}>
-        <Text style={styles.username}>{item.username}</Text>
-        {item.bio && <Text style={styles.bio} numberOfLines={1}>{item.bio}</Text>}
-      </View>
-      <Ionicons name="chevron-forward" size={24} color="#666" />
-    </TouchableOpacity>
-  );
 
   if (loading) {
     return (
@@ -86,13 +59,19 @@ export default function FollowersScreen() {
 
       {/* List */}
       {followers.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No followers yet</Text>
-        </View>
+        <EmptyState
+          icon="people-outline"
+          title="No followers yet"
+        />
       ) : (
         <FlatList
           data={followers}
-          renderItem={renderFollower}
+          renderItem={({ item }) => (
+            <UserListItem
+              user={item}
+              onPress={() => navigation.navigate('Profile', { userId: item.id })}
+            />
+          )}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
         />
@@ -127,41 +106,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: scale(16),
     paddingTop: scale(8),
-  },
-  userCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: scale(12),
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  avatar: {
-    width: scale(50),
-    height: scale(50),
-    borderRadius: 25,
-    backgroundColor: '#ddd',
-    marginRight: scale(12),
-  },
-  userInfo: {
-    flex: 1,
-  },
-  username: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  bio: {
-    fontSize: moderateScale(12),
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: moderateScale(16),
-    color: '#999',
   },
 });
 

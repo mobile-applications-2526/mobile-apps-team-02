@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
-import { supabase } from '../lib/supabase';
+import { authService } from '../services/auth.service';
 import AuthHeader from '../components/AuthHeader';
+import FormInput from '../components/FormInput';
 
 export default function RegisterScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const inputWidth = scale(329);
-  const inputHeight = verticalScale(55);
   const containerHeight = moderateScale(568);
   const verticalSpacing = verticalScale(20);
 
@@ -21,27 +20,14 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username, // store username in metadata
-        }
-      }
-    });
-
-    if (error) {
+    try {
+      await authService.signUp(email, password, username);
+      alert('Account has been successfully created!');
+      navigation.navigate('Home');
+    } catch (error) {
       console.log('Sign up error:', error.message);
       alert(error.message);
-      return;
     }
-
-    console.log('User registered:', data);
-
-    alert('Account has been successfully created!');
-    // Navigate to Home after successful registration
-    navigation.navigate('Home');
   };
 
   return (
@@ -65,48 +51,33 @@ export default function RegisterScreen({ navigation }) {
           },
         ]}
       >
-        <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Email</Text>
-          <TextInput
-            className="border border-gray-400 rounded-lg p-3"
-            style={{ height: inputHeight }}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            placeholder="Enter your email"
-          />
-        </View>
+        <FormInput
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoComplete="email"
+          placeholder="Enter your email"
+        />
 
-        <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Username</Text>
-          <TextInput
-            className="border border-gray-400 rounded-lg p-3"
-            style={{ height: inputHeight }}
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoComplete="username"
-            placeholder="Choose a username"
-          />
-        </View>
+        <FormInput
+          label="Username"
+          value={username}
+          onChangeText={setUsername}
+          autoComplete="username"
+          placeholder="Choose a username"
+        />
 
-        <View style={{ width: inputWidth, alignSelf: 'center', marginBottom: verticalSpacing }}>
-          <Text className="text-2xl font-bold">Password</Text>
-          <TextInput
-            className="border border-gray-400 rounded-lg p-3"
-            style={{ height: inputHeight }}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoComplete="password"
-            placeholder="Create a password"
-          />
-        </View>
+        <FormInput
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="password"
+          placeholder="Create a password"
+        />
 
-        <View style={{ width: inputWidth, alignSelf: 'center' }}>
+        <View style={{ width: scale(329), alignSelf: 'center' }}>
           <TouchableOpacity
             className="rounded-lg justify-center items-center"
             style={[styles.button,{ height: verticalScale(60) }]}

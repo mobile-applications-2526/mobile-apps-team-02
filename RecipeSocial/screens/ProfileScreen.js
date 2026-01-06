@@ -2,17 +2,22 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import Navbar from '../components/Navbar';
-import { supabase } from '../lib/supabase';
+import ProfileHeader from '../components/ProfileHeader';
+import UserStats from '../components/UserStats';
+import Stat from '../components/Stat';
+import { authService } from '../services/auth.service';
+import { userService } from '../services/user.service';
+import { getUserRecipes, deleteRecipe } from '../services/recipes.service';
+import { loadFavorites, toggleFavorite } from '../services/favorites.service';
 import { scale, moderateScale } from '../utils/scaling';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import VerticalRecipe from '../components/VerticalRecipe';
@@ -53,7 +58,7 @@ export default function ProfileScreen() {
   );
 
   const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await authService.getCurrentUser();
     setCurrentUser(user);
   };
 
@@ -68,53 +73,22 @@ export default function ProfileScreen() {
       console.log('ProfileScreen: Fetching for user ID:', idToFetch);
 
       // Profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('userinfo')
-        .select('*')
-        .eq('id', idToFetch)
-        .single();
-      if (!profileError) setProfile(profileData);
+      const profileData = await userService.getProfile(idToFetch);
+      setProfile(profileData);
 
-      // Recipes
-      const { data: recipesData, error: recipesError } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', idToFetch)
-        .order('created_at', { ascending: false });
-      if (!recipesError) {
-        console.log('ProfileScreen: Loaded', recipesData?.length || 0, 'recipes');
-        const normalized = recipesData.map(r => ({
-          recipe_id: r.id,
-          recipes: r,
-        }));
-
-        setRecipes(normalized);
-      }
+      // Recipes - use recipes service
+      const recipesData = await getUserRecipes(idToFetch);
+      console.log('ProfileScreen: Loaded', recipesData?.length || 0, 'recipes');
+      setRecipes(recipesData);
 
       // Followers / Following counts
-      const { count: followersCount } = await supabase
-        .from('followers')
-        .select('*', { count: 'exact', head: true })
-        .eq('following_id', idToFetch);
-      const { count: followingCount } = await supabase
-        .from('followers')
-        .select('*', { count: 'exact', head: true })
-        .eq('follower_id', idToFetch);
-
-      setStats({
-        followers: followersCount || 0,
-        following: followingCount || 0,
-      });
+      const statsData = await userService.getStats(idToFetch);
+      setStats(statsData);
 
       // Check if currentUser follows this profile
       if (currentUser && currentUser.id !== idToFetch) {
-        const { data: followData } = await supabase
-          .from('followers')
-          .select('*')
-          .eq('follower_id', currentUser.id)
-          .eq('following_id', idToFetch)
-          .single();
-        setIsFollowing(!!followData);
+        const following = await userService.isFollowing(currentUser.id, idToFetch);
+        setIsFollowing(following);
       }
 
     } catch (error) {
@@ -133,22 +107,12 @@ export default function ProfileScreen() {
     try {
       if (isFollowing) {
         // Unfollow
-        const { error } = await supabase
-          .from('followers')
-          .delete()
-          .eq('follower_id', currentUser.id)
-          .eq('following_id', profile.id);
-        if (error) throw error;
-
+        await userService.unfollowUser(currentUser.id, profile.id);
         setIsFollowing(false);
         setStats(prev => ({ ...prev, followers: prev.followers - 1 }));
       } else {
         // Follow
-        const { error } = await supabase
-          .from('followers')
-          .insert({ follower_id: currentUser.id, following_id: profile.id });
-        if (error) throw error;
-
+        await userService.followUser(currentUser.id, profile.id);
         setIsFollowing(true);
         setStats(prev => ({ ...prev, followers: prev.followers + 1 }));
       }
@@ -158,73 +122,39 @@ export default function ProfileScreen() {
     }
   };
 
-  const loadFavorites = async () => {
+  const loadUserFavorites = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('recipe_id')
-        .eq('user_id', user.id);
-
-      if (!error && data) {
-        setFavorites(new Set(data.map(fav => fav.recipe_id)));
-      }
+      const favSet = await loadFavorites();
+      setFavorites(favSet);
     } catch (err) {
       console.error('Error loading favorites:', err);
     }
   };
   useEffect(() => {
-    loadFavorites();
+    loadUserFavorites();
   }, []);
-  const toggleFavorite = async (recipeId) => {
+  const handleToggleFavorite = async (recipeId) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        Alert.alert('Login Required', 'Please login to save favorites');
-        return;
-      }
-
-      const isFavorite = favorites.has(recipeId);
-
+      const isFavorite = await toggleFavorite(recipeId);
+      const newFavorites = new Set(favorites);
       if (isFavorite) {
-        // Remove from favorites
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('recipe_id', recipeId);
-
-        if (error) {
-          Alert.alert('Error', error.message);
-        } else {
-          const newFavorites = new Set(favorites);
-          newFavorites.delete(recipeId);
-          setFavorites(newFavorites);
-        }
+        newFavorites.add(recipeId);
       } else {
-        // Add to favorites
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ user_id: user.id, recipe_id: recipeId });
-
-        if (error) {
-          Alert.alert('Error', error.message);
-        } else {
-          const newFavorites = new Set(favorites);
-          newFavorites.add(recipeId);
-          setFavorites(newFavorites);
-        }
+        newFavorites.delete(recipeId);
       }
+      setFavorites(newFavorites);
     } catch (err) {
       console.error('Error toggling favorite:', err);
+      if (err.message === 'Not authenticated') {
+        Alert.alert('Login Required', 'Please login to save favorites');
+      } else {
+        Alert.alert('Error', err.message);
+      }
     }
   };
 
 
-  const deleteRecipe = async (recipeId) => {
+  const handleDeleteRecipe = async (recipeId) => {
     Alert.alert(
       'Delete Recipe',
       'Are you sure you want to delete this recipe? This action cannot be undone.',
@@ -245,19 +175,9 @@ export default function ProfileScreen() {
 
               console.log('Attempting to delete recipe:', recipeId, 'by user:', currentUser.id);
 
-              // Delete the recipe - ensure user owns it
-              const { data, error } = await supabase
-                .from('recipes')
-                .delete()
-                .eq('id', recipeId)
-                .eq('user_id', currentUser.id);
+              await deleteRecipe(recipeId, currentUser.id);
 
-              if (error) {
-                console.error('Delete error:', JSON.stringify(error, null, 2));
-                throw error;
-              }
-
-              console.log('Delete successful:', data);
+              console.log('Delete successful');
 
               // Refresh recipes list
               await fetchProfileAndRecipes();
@@ -314,11 +234,11 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={[styles.editBtn, { marginLeft: scale(8), backgroundColor: '#FF4C4C' }]}
                 onPress={async () => {
-                  const { error } = await supabase.auth.signOut();
-                  if (error) {
-                    alert('Logout failed: ' + error.message);
-                  } else {
+                  try {
+                    await authService.signOut();
                     navigation.replace('Login');
+                  } catch (error) {
+                    Alert.alert('Logout failed', error.message);
                   }
                 }}
               >
@@ -357,9 +277,9 @@ export default function ProfileScreen() {
           recipes={recipes}
           favorites={favorites}
           onPress={(recipeId) => navigation.navigate('RecipeDetail', { recipeId })}
-          onToggleFavorite={toggleFavorite}
+          onToggleFavorite={handleToggleFavorite}
           isOwnProfile={isOwnProfile}
-          onDeleteRecipe={deleteRecipe}
+          onDeleteRecipe={handleDeleteRecipe}
         />
       </ScrollView>
 
@@ -369,12 +289,6 @@ export default function ProfileScreen() {
 }
 
 
-const Stat = ({ label, value }) => (
-  <View style={styles.statItem}>
-    <Text style={styles.statValue}>{value}</Text>
-    <Text style={styles.statLabel}>{label}</Text>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
@@ -386,8 +300,5 @@ const styles = StyleSheet.create({
   editBtn: { backgroundColor: '#eee', paddingHorizontal: scale(12), paddingVertical: scale(6), borderRadius: 8 },
   editText: { fontSize: 12, fontWeight: '600' },
   stats: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: scale(12) },
-  statItem: { alignItems: 'center' },
-  statValue: { fontWeight: '700', fontSize: 16 },
-  statLabel: { fontSize: 11, color: '#666' },
-  
+
 });

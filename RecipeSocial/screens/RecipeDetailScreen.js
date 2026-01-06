@@ -17,12 +17,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
-import { supabase } from '../lib/supabase';
 import IngredientsList from '../components/IngredientsList';
 import RecipeHeader from '../components/DetailScreen/RecipeHeader';
 import  RecipeTab from '../components/DetailScreen/RecipeTab';
 import RecipeContent from '../components/DetailScreen/RecipeContent';
 import CommentContent from '../components/DetailScreen/CommentContent';
+import { commentsService } from '../services/comments.service';
+import { checkIfFavorite, toggleFavorite } from '../services/favorites.service';
+import { deleteRecipe, getRecipeDetails, getRecipeIngredients } from '../services/recipes.service';
+import { authService } from '../services/auth.service';
 
 export default function RecipeDetailScreen({ route, navigation }) {
   const { recipeId } = route.params;
@@ -39,12 +42,12 @@ export default function RecipeDetailScreen({ route, navigation }) {
   useEffect(() => {
     loadRecipeDetails();
     loadComments();
-    checkIfFavorite();
+    checkFavoriteStatus();
     getCurrentUser();
   }, [recipeId]);
 
   const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await authService.getCurrentUser();
     setCurrentUser(user);
   };
 
@@ -53,30 +56,12 @@ export default function RecipeDetailScreen({ route, navigation }) {
       setLoading(true);
 
       // Fetch recipe details
-      const { data: recipeData, error: recipeError } = await supabase
-        .from('recipes')
-        .select(`*,   user:userinfo!recipes_user_id_fkey (
-          id,
-         username,
-         avatar_url
-         )
-          `)
-        .eq('id', recipeId)
-        .single();
-
-      if (recipeError) throw recipeError;
-
+      const recipeData = await getRecipeDetails(recipeId);
       setRecipe(recipeData);
 
       // Fetch ingredients
-      const { data: ingredientsData, error: ingredientsError } = await supabase
-        .from('recipe_ingredients')
-        .select('ingredient, quantity')
-        .eq('recipe_id', recipeId);
-
-      if (ingredientsError) throw ingredientsError;
-
-      setIngredients(ingredientsData || []);
+      const ingredientsData = await getRecipeIngredients(recipeId);
+      setIngredients(ingredientsData);
     } catch (error) {
       console.error('Error loading recipe:', error);
       Alert.alert('Error', 'Failed to load recipe details');
@@ -90,60 +75,9 @@ export default function RecipeDetailScreen({ route, navigation }) {
       setCommentsLoading(true);
       console.log('Loading comments for recipe:', recipeId);
 
-      // Fetch comments
-      const { data: commentsData, error: commentsError } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('recipe_id', recipeId)
-        .order('created_at', { ascending: false });
-
-      if (commentsError) throw commentsError;
-
+      const commentsData = await commentsService.getComments(recipeId);
       console.log('Comments fetched:', commentsData?.length || 0, 'comments');
-      console.log('Comments data:', JSON.stringify(commentsData, null, 2));
-
-      if (!commentsData || commentsData.length === 0) {
-        console.log('No comments found for this recipe');
-        setComments([]);
-        return;
-      }
-
-      // Get unique user IDs
-      const userIds = [...new Set(commentsData.map(c => c.user_id))];
-      console.log('Fetching user info for:', userIds);
-
-      // Fetch user info for all users who commented
-      const { data: usersData, error: usersError } = await supabase
-        .from('userinfo')
-        .select('id, username, avatar_url')
-        .in('id', userIds);
-
-      if (usersError) {
-        console.error('Error loading user info:', usersError);
-        // Still show comments without user info
-        setComments(commentsData.map(comment => ({
-          ...comment,
-          user: { username: 'Anonymous' }
-        })));
-        return;
-      }
-
-      console.log('Users data fetched:', usersData?.length || 0, 'users');
-      console.log('Users data:', JSON.stringify(usersData, null, 2));
-
-      // Map user info to comments
-      const usersMap = {};
-      (usersData || []).forEach(user => {
-        usersMap[user.id] = user;
-      });
-
-      const commentsWithUsers = commentsData.map(comment => ({
-        ...comment,
-        user: usersMap[comment.user_id] || { username: 'Anonymous' }
-      }));
-
-      console.log('Final comments with users:', JSON.stringify(commentsWithUsers, null, 2));
-      setComments(commentsWithUsers);
+      setComments(commentsData || []);
     } catch (error) {
       console.error('Error loading comments:', error);
       setComments([]);
@@ -152,60 +86,31 @@ export default function RecipeDetailScreen({ route, navigation }) {
     }
   };
 
-  const checkIfFavorite = async () => {
+  const checkFavoriteStatus = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('recipe_id', recipeId)
-        .single();
-
-      if (!error && data) {
-        setIsFavorite(true);
-      }
+      const isFav = await checkIfFavorite(recipeId);
+      setIsFavorite(isFav);
     } catch (error) {
-      // Not a favorite or error
+      console.error('Error checking favorite:', error);
       setIsFavorite(false);
     }
   };
 
-  const toggleFavorite = async () => {
+  const handleToggleFavorite = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        Alert.alert('Login Required', 'Please login to save favorites');
-        return;
-      }
-
-      if (isFavorite) {
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('recipe_id', recipeId);
-
-        if (error) throw error;
-        setIsFavorite(false);
-      } else {
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ user_id: user.id, recipe_id: recipeId });
-
-        if (error) throw error;
-        setIsFavorite(true);
-      }
+      const isFav = await toggleFavorite(recipeId);
+      setIsFavorite(isFav);
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      Alert.alert('Error', 'Failed to update favorite');
+      if (error.message === 'Not authenticated') {
+        Alert.alert('Login Required', 'Please login to save favorites');
+      } else {
+        Alert.alert('Error', 'Failed to update favorite');
+      }
     }
   };
 
-  const deleteRecipe = async () => {
+  const handleDeleteRecipe = async () => {
     Alert.alert(
       'Delete Recipe',
       'Are you sure you want to delete this recipe? This action cannot be undone.',
@@ -219,7 +124,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              const { data: { user } } = await supabase.auth.getUser();
+              const user = await authService.getCurrentUser();
 
               if (!user) {
                 Alert.alert('Error', 'You must be logged in to delete recipes');
@@ -228,17 +133,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
 
               console.log('Attempting to delete recipe:', recipeId, 'by user:', user.id);
 
-              // Delete the recipe - ensure user owns it
-              const { error } = await supabase
-                .from('recipes')
-                .delete()
-                .eq('id', recipeId)
-                .eq('user_id', user.id);
-
-              if (error) {
-                console.error('Delete error:', JSON.stringify(error, null, 2));
-                throw error;
-              }
+              await deleteRecipe(recipeId, user.id);
 
               console.log('Recipe deleted successfully');
 
@@ -265,7 +160,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await authService.getCurrentUser();
 
       if (!user) {
         Alert.alert('Login Required', 'Please login to comment');
@@ -275,15 +170,7 @@ export default function RecipeDetailScreen({ route, navigation }) {
       // Dismiss keyboard first for better UX
       Keyboard.dismiss();
 
-      const { error } = await supabase
-        .from('comments')
-        .insert({
-          recipe_id: recipeId,
-          user_id: user.id,
-          content: newComment.trim(),
-        });
-
-      if (error) throw error;
+      await commentsService.addComment(recipeId, user.id, newComment.trim());
 
       // Clear input and reload comments
       setNewComment('');
@@ -348,9 +235,9 @@ export default function RecipeDetailScreen({ route, navigation }) {
         recipe={recipe}
         currentUser={currentUser}
         isFavorite={isFavorite}
-        onDelete={deleteRecipe}
-        onToggleFavorite={toggleFavorite}
-        styles={styles} />
+        onDelete={handleDeleteRecipe}
+        onToggleFavorite={handleToggleFavorite}
+      />
       {/* Tabs */}
       <RecipeTab activeTab={activeTab} setActiveTab={setActiveTab} comments={comments} />
 
