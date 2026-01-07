@@ -1,7 +1,4 @@
 import { View, Text, Button, Alert, TouchableOpacity, Image, StyleSheet } from 'react-native'
-import React from 'react'
-import Navbar from '../components/Navbar'
-import Header from '../components/Header'
 
 export default function StartScreen({ navigation }) {
   return (

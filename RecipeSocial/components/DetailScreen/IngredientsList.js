@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { moderateScale } from "../utils/scaling";
+import { moderateScale } from "../../utils/scaling";
 
 export default function IngredientsList({ ingredients }) {
     return (

@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet, } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {  ScrollView,Alert, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';

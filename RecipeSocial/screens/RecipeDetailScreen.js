@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
   Alert,
   StyleSheet,
   ActivityIndicator,
@@ -18,7 +17,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { scale, verticalScale, moderateScale } from '../utils/scaling';
-import IngredientsList from '../components/IngredientsList';
 import RecipeHeader from '../components/DetailScreen/RecipeHeader';
 import  RecipeTab from '../components/DetailScreen/RecipeTab';
 import RecipeContent from '../components/DetailScreen/RecipeContent';
@@ -357,19 +355,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontWeight: '600',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(12),
-  },
-  backIcon: {
-    padding: scale(8),
-  },
-  favoriteIcon: {
-    padding: scale(8),
-  },
   content: {
     flex: 1,
     backgroundColor: '#F3FFF4',
@@ -381,34 +366,6 @@ const styles = StyleSheet.create({
   starsContainer: {
     flexDirection: 'row',
     gap: scale(2),
-  },
-  section: {
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(16),
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  sectionTitle: {
-    fontSize: moderateScale(22),
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: verticalScale(12),
-  },
-  ingredientItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(10),
-    marginBottom: verticalScale(8),
-  },
-  ingredientText: {
-    fontSize: moderateScale(16),
-    color: '#333',
-    flex: 1,
-  },
-  instructionsText: {
-    fontSize: moderateScale(16),
-    color: '#333',
-    lineHeight: moderateScale(24),
   },
   commentInputContainer: {
     flexDirection: 'row',

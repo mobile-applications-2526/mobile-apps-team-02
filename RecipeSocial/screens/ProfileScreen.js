@@ -7,12 +7,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Navbar from '../components/Navbar';
 import ProfileHeader from '../components/ProfileHeader';
-import UserStats from '../components/UserStats';
 import Stat from '../components/Stat';
 import { authService } from '../services/auth.service';
 import { userService } from '../services/user.service';
@@ -283,17 +281,10 @@ export default function ProfileScreen() {
   );
 }
 
-
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   header: { borderBottomWidth: scale(1.5), borderBottomColor: '#E5E5E5', },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  avatar: { width: scale(70), height: scale(70), borderRadius: 35, backgroundColor: '#ddd', marginRight: scale(12) },
-  username: { fontSize: moderateScale(18), fontWeight: '700' },
-  bio: { fontSize: moderateScale(12), color: '#666', marginVertical: 4 },
-  editBtn: { backgroundColor: '#eee', paddingHorizontal: scale(12), paddingVertical: scale(6), borderRadius: 8 },
-  editText: { fontSize: 12, fontWeight: '600' },
   stats: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: scale(12), backgroundColor: '#DAFFDB' },
   statItem: {
     flex: 1,

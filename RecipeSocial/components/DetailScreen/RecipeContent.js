@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { moderateScale, scale, verticalScale } from "../../utils/scaling";
-import IngredientsList from "../IngredientsList";
+import IngredientsList from "./IngredientsList";
 export default function RecipeContent({ recipe,ingredients, renderStars }) {
     return (
         <View style={styles.titleContainer}>

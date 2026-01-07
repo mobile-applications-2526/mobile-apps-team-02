@@ -99,9 +99,6 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#rgba(124, 197, 126)',
   },
-  border: {
-    borderColor: '#7CC57E',
-  },
   text: {
     color: '#d34067',
   }
