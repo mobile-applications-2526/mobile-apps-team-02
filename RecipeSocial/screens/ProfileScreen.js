@@ -231,74 +231,42 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }} key={refreshKey}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={
-              profile?.avatar_url
-                ? { uri: profile.avatar_url }
-                : require('../assets/pfp.jpg')
+      {/* Header */}
+      <View style={styles.header}>
+        <ProfileHeader
+          profile={profile}
+          isOwnProfile={isOwnProfile}
+          isFollowing={isFollowing}
+          onEditPress={() => navigation.navigate('EditProfile', { profile })}
+          onLogoutPress={async () => {
+            try {
+              await authService.signOut();
+              navigation.replace('Login');
+            } catch (error) {
+              Alert.alert('Logout failed', error.message);
             }
-            style={styles.avatar}
-          />
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.username}>{profile?.username}</Text>
-            <Text style={styles.bio}>{profile?.bio || 'No bio yet'}</Text>
-          </View>
-
-          {/* Buttons */}
-          {isOwnProfile ? (
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity
-                style={styles.editBtn}
-                onPress={() => navigation.navigate('EditProfile')}
-              >
-                <Text style={styles.editText}>Edit</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.editBtn, { marginLeft: scale(8), backgroundColor: '#FF4C4C' }]}
-                onPress={async () => {
-                  try {
-                    await authService.signOut();
-                    navigation.replace('Login');
-                  } catch (error) {
-                    Alert.alert('Logout failed', error.message);
-                  }
-                }}
-              >
-                <Text style={[styles.editText, { color: '#fff' }]}>Logout</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={[
-                styles.editBtn,
-                { backgroundColor: isFollowing ? '#ccc' : '#7CC57E' }
-              ]}
-              onPress={toggleFollow}
-            >
-              <Text style={[styles.editText, { color: isFollowing ? '#333' : '#fff' }]}>
-                {isFollowing ? 'Following' : 'Follow'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+          }}
+          onFollowPress={toggleFollow}
+        />
 
         {/* Stats */}
         <View style={styles.stats}>
+          <View style={styles.statItem}>
           <Stat label="Reputation" value={profile?.reputation || 0} />
+          </View>
+          <View style={styles.statItem}>
           <Stat label="Recipes" value={recipes.length} />
-          <TouchableOpacity onPress={() => navigation.navigate('Followers', { userId: profile?.id })}>
+          </View>
+          <TouchableOpacity  style={styles.statItem} onPress={() => navigation.navigate('Followers', { userId: profile?.id })}>
             <Stat label="Followers" value={stats.followers} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Following', { userId: profile?.id })}>
+          <TouchableOpacity  style={[styles.statItem, styles.statItemLast]} onPress={() => navigation.navigate('Following', { userId: profile?.id })}>
             <Stat label="Following" value={stats.following} />
           </TouchableOpacity>
         </View>
+      </View>
 
+      <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }} key={refreshKey}>
         {/* Recipe Grid */}
         <VerticalRecipe
           recipes={recipes}
@@ -319,13 +287,23 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
+  header: { borderBottomWidth: scale(1.5), borderBottomColor: '#E5E5E5', },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', padding: scale(16), alignItems: 'center' },
   avatar: { width: scale(70), height: scale(70), borderRadius: 35, backgroundColor: '#ddd', marginRight: scale(12) },
   username: { fontSize: moderateScale(18), fontWeight: '700' },
   bio: { fontSize: moderateScale(12), color: '#666', marginVertical: 4 },
   editBtn: { backgroundColor: '#eee', paddingHorizontal: scale(12), paddingVertical: scale(6), borderRadius: 8 },
   editText: { fontSize: 12, fontWeight: '600' },
-  stats: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: scale(12) },
+  stats: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: scale(12), backgroundColor: '#DAFFDB' },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#E5E5E5',
+  },
+  statItemLast: {
+    borderRightWidth: 0,
+  },
 
 });
