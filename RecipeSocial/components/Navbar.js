@@ -1,17 +1,24 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { scale, verticalScale, moderateScale } from '../utils/scaling';
+import { scale, verticalScale } from '../utils/scaling';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function Navbar() {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const isActive = (name) => route.name === name;
+
+  const btnStyle = (name) => [
+    styles.buttons,
+    isActive(name) && styles.activeButton,
+  ];
 
   return (
     <View style={styles.container}>
-
       <TouchableOpacity
-        style={styles.buttons}
+        style={btnStyle('Home')}
         onPress={() => navigation.navigate('Home')}
         testID="nav-home"
         nativeID="nav-home"
@@ -21,7 +28,7 @@ export default function Navbar() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.buttons}
+        style={btnStyle('Create')}
         onPress={() => navigation.navigate('Create')}
         testID="nav-create"
         nativeID="nav-create"
@@ -31,7 +38,7 @@ export default function Navbar() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.buttons}
+        style={btnStyle('Collections')}
         onPress={() => navigation.navigate('Collections')}
         testID="nav-collections"
         nativeID="nav-collections"
@@ -39,7 +46,6 @@ export default function Navbar() {
       >
         <Ionicons name="heart-outline" size={verticalScale(28)} color="black" />
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -55,7 +61,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     backgroundColor: '#7CC57E',
     alignItems: 'center',
-
     position: 'absolute',
     bottom: verticalScale(10),
   },
@@ -67,5 +72,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
+  },
+  activeButton: {
+    backgroundColor: '#f6db91ff',
+    elevation: 6,
   },
 });

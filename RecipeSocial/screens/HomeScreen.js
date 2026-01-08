@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {  ScrollView,Alert, } from 'react-native';
+import { ScrollView, Alert,View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
@@ -42,14 +42,16 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} navigation={navigation} />
-      <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
-        <Category
-          CategoriesAndRecipes={CategoriesAndRecipes}
-          selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
-        />
-      </ScrollView>
+      <View>
+        <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} navigation={navigation} />
+        <ScrollView horizontal={true} style={{ maxHeight: verticalScale(50) }}>
+          <Category
+            CategoriesAndRecipes={CategoriesAndRecipes}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </ScrollView>
+      </View>
       <ScrollView contentContainerStyle={{ paddingBottom: scale(120) }}>
         <Recipes
           CategoriesAndRecipes={CategoriesAndRecipes}
