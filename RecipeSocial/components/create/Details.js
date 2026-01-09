@@ -71,6 +71,7 @@ export default function Details({ categories, setCategories, selected, setSelect
                                 selectedValue={difficulty}
                                 onValueChange={(value) => setDifficulty(value)}
                                 testID="difficulty-picker"
+                                textColor="#000"
                             >
                                 <Picker.Item label="Select difficulty" value="" />
                                 <Picker.Item label="Very Easy" value="very_easy" />
@@ -86,6 +87,7 @@ export default function Details({ categories, setCategories, selected, setSelect
                             style={styles.input}
                             keyboardType="number-pad"
                             inputMode="numeric"
+                            placeholderTextColor="#6B7280"
                             value={prepTime}
                             testID="prep-time-input"
                             onChangeText={(text) => {
@@ -161,6 +163,7 @@ const styles = StyleSheet.create({
     },
     input: {
         borderColor: "#000000ff",
+        color: '#000',
         borderWidth: 1,
         borderRadius: 8,
         padding: 15,

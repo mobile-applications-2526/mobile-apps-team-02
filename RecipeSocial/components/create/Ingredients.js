@@ -62,6 +62,7 @@ export default function Ingredients({ ingredients,
                             value={newIngredient.ingredient}
                             testID="ingredient-name-input"
                             returnKeyType="done"
+                            placeholderTextColor="#6B7280"
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, ingredient: text }))
                             }
@@ -73,6 +74,7 @@ export default function Ingredients({ ingredients,
                             returnKeyType="done"
                             value={newIngredient.size}
                             testID="ingredient-qty-input"
+                            placeholderTextColor="#6B7280"
                             onChangeText={(text) =>
                                 setNewIngredient((prev) => ({ ...prev, size: text }))
                             }
@@ -108,7 +110,7 @@ const styles = StyleSheet.create({
         maxHeight: verticalScale(600),
     },
     list: {
-       
+
     },
     addingContainer: {
         justifyContent: "flex-end",
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     input: {
+        color: '#000',
         borderColor: "#000000ff",
         borderWidth: 1,
         borderRadius: 8,

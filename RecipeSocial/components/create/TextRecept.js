@@ -18,6 +18,7 @@ export default function TextRecept({ title,
                 placeholder="Title"
                 returnKeyType="done"
                 testID="recipe-title-input"
+                placeholderTextColor="#6B7280"
                 value={title}
                 onChangeText={(title) => setTitle(title)}
             />
@@ -28,6 +29,7 @@ export default function TextRecept({ title,
                 returnKeyType="done"
                 textAlignVertical="top"
                 testID="recipe-description-input"
+                placeholderTextColor="#6B7280"
                 blurOnSubmit={false}
                 value={description}
                 onChangeText={(text) => setDescription(text)}

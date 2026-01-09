@@ -25,7 +25,11 @@ export default function FormInput({
       {label && <Text className="text-2xl font-bold">{label}</Text>}
       <TextInput
         className="border border-gray-400 rounded-lg p-3"
-        style={{ height: inputHeight, textAlignVertical: multiline ? 'top' : 'center' }}
+        style={{
+          height: inputHeight, color: '#000',
+          textAlignVertical: multiline ? 'top' : 'center'
+        }}
+        placeholderTextColor="#6B7280"
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
